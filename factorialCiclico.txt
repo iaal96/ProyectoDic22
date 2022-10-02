@@ -1,0 +1,10 @@
+program factorialCiclico;
+
+main() {
+    var int x, resultado;
+    resultado = 1;
+    for x = 1 to x < 5 {
+        resultado = resultado * x;
+    }
+    imprime(resultado);
+}

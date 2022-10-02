@@ -1,0 +1,23 @@
+program multiplicacionMatrices;
+
+main() {
+    var int matrix1[3][2], matrix2[2][3], result[3][3], i, j;
+    matrix1[0][0] = 1;
+    matrix1[0][1] = 2;
+    matrix1[1][0] = 3;
+    matrix1[1][1] = 4;
+    matrix1[2][0] = 5;
+    matrix1[2][1] = 6;
+    matrix2[0][0] = 1;
+    matrix2[0][1] = 2;
+    matrix2[0][2] = 3;
+    matrix2[1][0] = 3;
+    matrix2[1][1] = 4;
+    matrix2[1][2] = 5;
+    result = matrix1 * matrix2; 
+for j = 0 to j < 3 {
+        for i = 0 to i < 3 {
+            print(result[i][j]);
+        }
+    }
+}

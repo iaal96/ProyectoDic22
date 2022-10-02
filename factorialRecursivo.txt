@@ -1,0 +1,14 @@
+programa factorialRecursivo;
+
+funcion int factorial(int x) {
+    si (x > 1) entonces {
+        regresa(x * factorial(x - 1));
+    }
+    regresa(1);
+}
+
+principal() {
+    var int y;
+    y = factorial(5);
+    imprime(y);
+}
