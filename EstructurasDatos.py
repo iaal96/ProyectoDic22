@@ -119,3 +119,48 @@ for i in ty:
                 semanticCube[(ty[i], ty[i], j)] = "error"
             else:
                 semanticCube[(ty[i], ty[i], j)] = "float"
+
+#for i in ty:
+    #for j in ty:
+        #for k in ops:
+            #print("%s %s %s = %s" % (ty[i], k, ty[j], semanticCube[(ty[i], ty[j], k)]))
+
+
+# functionDir visual example
+'''
+    "global": {
+        "type": "void",
+        "vars": variableTable["global"] -> "i": {
+                                                "type": "int"
+                                                "value": 1
+                                                "address": 0
+                                            }
+                                            ...
+    }
+    "main": {
+        "type": "void",
+        "vars": variableTable["main"] -> "c": {
+                                              "type": "char"
+                                              "value": "h"
+                                              "address": 2000
+                                         }
+                                         ...
+    }
+    "funcion_uno": {
+        "type": "int",
+        "params": Queue[int, int, float]
+        "paramsLength": len(params)
+        "vars": variableTable["uno"] -> "x": {
+                                            "type": "int"
+                                            "value": 1
+                                        }
+    }
+'''
+
+# semanticCube explanation
+'''
+    keys are tuples => (operand1, operand2, operator)
+    semanticCube[(op1, op2, op)] => int/float/char/error
+    semanticCube[("int", "int", "+")] => "int"
+    semanticCube[("char", "float", "*")] => "error"
+'''

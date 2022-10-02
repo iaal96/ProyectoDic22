@@ -1,7 +1,7 @@
 programa factorialCiclico;
 
 principal() {
-    var int x, resultado;
+    var int x, y;
     imprime(x);
     resultado = 1;
     para x = 1 hasta x < 5 {

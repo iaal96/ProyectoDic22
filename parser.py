@@ -1,4 +1,5 @@
 import ply.yacc as yacc
+from cuadruplos import *
 from EstructurasDatos import *
 import lexer as lexer
 from re import U 
@@ -7,7 +8,6 @@ from lexer import tokens
 from errores import Error
 #Data pretty printer
 from pprint import pprint
-
 
 tokens = lexer.tokens
 
@@ -18,6 +18,14 @@ def p_program(t):
 # global scope varTable
 def p_globalTable(t):
 	'''globalTable : '''
+	# Inicializar variableTable para global scope y definir nombre y tipo del programa
+	variableTable[currentScope] = {}
+	variableTable[currentScope][t[-1]] = {"type": "program"}
+	# Inicializar functionDir para global scope
+	functionDir[currentScope] = {}
+	# Definir tipo y variables como referencia a variableTable["global"]
+	functionDir[currentScope]["type"] = "void"
+	functionDir[currentScope]["vars"] = variableTable[currentScope]
 
 def p_programFunc(t):
 	'''programFunc : function programFunc
@@ -29,10 +37,21 @@ def p_main(t):
 # main scope varTable
 def p_mainTable(t):
 	'''mainTable : '''
+	global currentScope
+	#Agrega main a currentScope varTable
+	variableTable[currentScope]["main"] = {"type": "void"}
+	currentScope = "main"
+	# Inicializar variableTable y functionDir para main scope
+	variableTable[currentScope] = {}
+	functionDir[currentScope] = {}
+	# Definir tipo de funcion y variables como referencia a variableTable["main"]
+	functionDir[currentScope]["type"] = "void"
+	functionDir[currentScope]["vars"] = variableTable[currentScope]
 
 def p_assignment(t):
 	'''assignment : ID dimArray IGUAL hyperExpression PUNTOYCOMA'''
 
+		
 def p_declaration(t):
 	'''declaration : VAR declarationPrim
 				   | '''
@@ -45,6 +64,9 @@ def p_primitive(t):
 	'''primitive : INT
 				 | FLOAT
 				 | CHAR '''
+	# Cambiar currentType por declaracion
+	global currentType
+	currentType = t[1]
 
 def p_return(t):
 	'''return : REGRESA LEFTPAR hyperExpression RIGHTPAR PUNTOYCOMA'''
@@ -94,12 +116,26 @@ def p_updateQuadFor(t):
 
 def p_forAssignment(t):
 	'''forAssignment : ID IGUAL CST_INT addTypeInt'''
+	#Checar si el id existe en currentScope y asignar su valor
+	if t[1] in variableTable[currentScope]:
+		variableTable[currentScope][t[1]]["value"] = t[3]
+	#Checar si el id existe en global scope y asignar su valor
+	elif t[1] in variableTable["global"]:
+		variableTable["global"][t[1]]["value"] = t[3]
+	else:
+		Error.undefined_variable(t[1], t.lexer.lineno)
 
 def p_vars(t):
 	'''vars : ID addVarsToTable varsArray varsComa'''
 
 def p_addVarsToTable(t):
 	'''addVarsToTable : '''
+#Si el ID ya existe en el scope o global, dar error
+	if t[-1] in variableTable[currentScope]:
+		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
+	else:
+		# Agregar ID actual a variableTable(scope)
+		variableTable[currentScope][t[-1]] = {"type": currentType}
 
 def p_varsComa(t):
 	'''varsComa : COMA vars
@@ -121,16 +157,40 @@ def p_setCols(t):
 
 def p_function(t):
 	'''function : functionType ID addFuncToDir LEFTPAR param RIGHTPAR setParamLength LEFTBRACE declaration statement RIGHTBRACE'''
+    #Resetear scope a global cuando se salga del scope de la funcion, eliminar varTable y referenciar en functionDir
+	global currentScope
+	# Variables temporales = longitud del cuadruplo de funcion al maximo y resetear func_quads
+	functionDir[currentScope]["varLength"] = len(functionDir[currentScope]["vars"])
+	currentScope = "global"
 
 def p_addFuncToDir(t):
 	'''addFuncToDir : '''
-
+	# Si la funcion existe en global scope, dar error
+	if t[-1] in variableTable["global"]:
+		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
+	else:
+		global currentScope
+		global currentType
+		# Agregar funcion a variableTable de currentScope
+		variableTable["global"][t[-1]] = {"type": currentType}
+		# Cambiar scope al nuevo id de la funcion
+		currentScope = t[-1]
+		# Inicializar variableTable y functionDir por nuevo id de la funcion
+		variableTable[currentScope] = {}
+		functionDir[currentScope] = {}
+		# Definir nuevo tipo de funcion y vars como referencia a variableTable[currentScope]
+		functionDir[currentScope]["type"] = currentType
+		functionDir[currentScope]["vars"] = variableTable[currentScope]
+   
 def p_functionType(t):
 	'''functionType : FUNCION primitive
 					| FUNCION VOID setVoidType '''
 
 def p_setVoidType(t):
 	'''setVoidType : '''
+	# Definir void como currentType
+	global currentType
+	currentType = t[-1]
 
 def p_param(t):
 	'''param : primitive ID addFuncParams functionParam
@@ -138,9 +198,21 @@ def p_param(t):
 
 def p_addFuncParams(t):
 	'''addFuncParams : '''
+	# Si parametro de la funcion existe en el scope, dar error
+	if t[-1] in variableTable[currentScope]:
+		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
+	else:
+		# Agregar parametro de la funcion a variableTable de currentScope
+		variableTable[currentScope][t[-1]] = {"type": currentType}
+	if "params" not in functionDir[currentScope]:
+		functionDir[currentScope]["params"] = Queue()
+		# Insertar currentTypes en params Queue
+		functionDir[currentScope]["params"].enqueue(currentType)
 
 def p_setParamLength(t):
 	'''setParamLength : '''
+	#Asignar el numero de parametro de la funcion al tamano del Queue params
+	functionDir[currentScope]["paramsLength"] = functionDir[currentScope]["params"].size()
 
 def p_functionParam(t):
 	'''functionParam : COMA param
@@ -153,12 +225,15 @@ def p_cst_prim(t):
 
 def p_addTypeInt(t):
 	'''addTypeInt : '''
+	types.push("int")
 
 def p_addTypeFloat(t):
 	'''addTypeFloat : '''
+	types.push("float")
 
 def p_addTypeChar(t):
 	'''addTypeChar : '''
+	types.push("char")
 
 def p_hyperExpression(t):
 	'''hyperExpression : superExpression evaluateHE opHyperExpression hyperExpressionNested
@@ -290,6 +365,12 @@ def p_module(t):
 
 def p_checkFuncExists(t):
 	'''checkFuncExists : '''
+	if t[-1] not in functionDir:
+		Error.undefined_module(t[-1], t.lexer.lineno)
+	global funcName
+	funcName = t[-1]
+	operators.push("module")
+	types.push(functionDir[funcName]["type"])
 
 def p_genERASize(t):
 	'''genERASize : '''
@@ -320,6 +401,13 @@ def p_addOperandId(t):
 
 def p_addTypeId(t):
 	'''addTypeId : '''
+	#Hacer push a los tipos al stack de tipos
+	if t[-2] in variableTable[currentScope]:
+		types.push(variableTable[currentScope][t[-2]]["type"])
+	elif t[-2] in variableTable["global"]:
+		types.push(variableTable["global"][t[-2]]["type"])
+	else:
+		Error.undefined_variable(t[-2], t.lexer.lineno)
 
 def p_readIDType(t):
 	'''readIDType : '''
