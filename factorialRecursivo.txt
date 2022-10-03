@@ -7,9 +7,8 @@ funcion int factorial(int x, int y) {
     regresa(1);
 }
 
-
 principal() {
-    var int y, x = 5;
+    var int y, x;
     x = factorial(x);
-    imprime(y);
+    imprime(x);
 }

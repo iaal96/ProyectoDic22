@@ -1,9 +1,9 @@
-program factorialCiclico;
+programa factorialCiclico;
 
-main() {
+principal() {
     var int x, resultado;
     resultado = 1;
-    for x = 1 to x < 5 {
+    para x = 1 hasta x < 5 {
         resultado = resultado * x;
     }
     imprime(resultado);

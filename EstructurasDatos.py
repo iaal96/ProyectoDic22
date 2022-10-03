@@ -126,7 +126,7 @@ for i in ty:
             #print("%s %s %s = %s" % (ty[i], k, ty[j], semanticCube[(ty[i], ty[j], k)]))
 
 
-# functionDir visual example
+# functionDir ejemplo
 '''
     "global": {
         "type": "void",

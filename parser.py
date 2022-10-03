@@ -427,8 +427,8 @@ def p_checkMatAsArray(t):
 
 def p_error(t):
 	'''error : '''
-	print("Error sintactico ")
-	exit()
+	print("Syntax error: Token '%s' inesperado en la linea %d" % (t.value, t.lexer.lineno))
+	exit(0)
 
 import sys 
 if len(sys.argv) > 1:

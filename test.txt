@@ -1,10 +1,10 @@
 programa factorialCiclico;
 
 principal() {
-    var int x, y;
+    var int x, y, resultado;
     imprime(x);
     resultado = 1;
-    para x = 1 hasta x < 5 {
+    para x = 1 hasta y < 5 {
         resultado = resultado * x;
     }
 }
