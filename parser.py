@@ -393,12 +393,12 @@ def p_evaluateTerm(t):
 	if operators.size() != 0:
 		# Generar cuadruplos para operadores de suma y resta
 		if operators.peek() == "+" or operators.peek() == "-":
-			# Operandos pop
+			# Pop a operandos
 			rOp = operands.pop()
 			lOp = operands.pop()
-			# Operador pop
+			# Pop a operador
 			oper = operators.pop()
-			# Tipos de pop
+			# Pop a tipos
 			rType = types.pop()
 			lType = types.pop()
 			# Checar cubo semantico con tipos y operadores
@@ -444,12 +444,12 @@ def p_evaluateFactor(t):
 	if operators.size() != 0:
 		# Generar cuadruplos para operadores de multiplicacion y division
 		if operators.peek() == "*" or operators.peek() == "/":
-			# Operandos pop
+			# Pop a operandos
 			rOp = operands.pop()
 			lOp = operands.pop()
-			# Operador pop
+			# Pop a operadores
 			oper = operators.pop()
-			# Tipos de pop
+			# Pop a tipos
 			rType = types.pop()
 			lType = types.pop()
 			# Checar cubo semantico con tipos y operador
