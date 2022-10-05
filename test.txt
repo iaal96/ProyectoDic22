@@ -1,10 +1,19 @@
-programa factorialCiclico;
+programa myprog;
 
 principal() {
-    var int x, y, resultado;
-    imprime(x);
-    resultado = 1;
-    para x = 1 hasta y < 5 {
-        resultado = resultado * x;
+var int a,b,c,d;
+a=5;
+b=7;
+c=9;
+d=11;
+    si(a > b+c) entonces {
+        b = c-a;
+     si (a < c+d) entonces {
+        b = d+a;
+     }
     }
+    sino{
+        c = a+b;
+    }
+    a=a+b;
 }

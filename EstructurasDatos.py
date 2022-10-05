@@ -1,4 +1,3 @@
-#temp=1
 class Stack:
     def __init__(self):
         self.items = []
@@ -56,29 +55,13 @@ semanticCube = {}
 operators = Stack()
 operands = Stack()
 types = Stack()
-arrMatOperands = Stack()
-addresses = {
-    "gInt": 0,
-    "gFloat": 1000,
-    "gChar": 2000,
-    "lInt": 3000,
-    "lFloat": 4000,
-    "lChar": 5000,
-    "tInt": 6000,
-    "tFloat": 7000,
-    "tChar": 8000,
-    "cInt": 9000,
-    "cFloat": 10000,
-    "cChar": 11000,
-    "tPoint": 12000,
-    "void": 13000
-}
+temp = 1
 ty = {
     0: "int",
     1: "float",
     2: "char"
 }
-ops = ["+", "-", "*", "/", ">", "<", "<>", "==", "&", "|", "!", "?", "$"]
+ops = ["+", "-", "*", "/", ">", "<", "<>", "==", "&", "|"]
 #print("Cubo Semantico: ")
 for i in ty:
     for j in ty:
@@ -90,7 +73,7 @@ for i in ty:
             if i == 2 or j == 2:
                 semanticCube[(ty[i], ty[j], k)] = "error"
                   # print("%s %s %s = %s" % (types[i], k, types[j], semanticCube[(types[i], types[j], k)]))
-            if k == ">" or k == "<" or k == "<>" or k == "==":
+            if k == ">" or k == "<" or k == "<>" or k == "==" or k == "|" or k == "&":
                 if (i == 0 or i == 1) and (j == 0 or j == 1):
                     semanticCube[(ty[i], ty[j], k)] = "int"
                 else:
@@ -101,39 +84,16 @@ for i in ty:
             if k == "/":
                 if i != 2 and j != 2:
                     semanticCube[(ty[i], ty[j], k)] = "float"
-            if k == "|":
-                semanticCube[(ty[i], ty[j], k)] = ty[i]
-            elif k == "&":
-                semanticCube[(ty[i], ty[j], k)] = ty[j]
-for i in ty:
-    for j in ops:
-        if j == "$":
-            if i == 2:
-                semanticCube[(ty[i], ty[i], j)] = "error"
-            else:
-                semanticCube[(ty[i], ty[i], j)] = "float"
-        if j == "!":
-            semanticCube[(ty[i], ty[i], j)] = ty[i]
-        if j == "?":
-            if i == 2:
-                semanticCube[(ty[i], ty[i], j)] = "error"
-            else:
-                semanticCube[(ty[i], ty[i], j)] = "float"
-
-#for i in ty:
-    #for j in ty:
-        #for k in ops:
-            #print("%s %s %s = %s" % (ty[i], k, ty[j], semanticCube[(ty[i], ty[j], k)]))
+            # print("%s %s %s = %s" % (ty[i], k, ty[j], semanticCube[(ty[i], ty[j], k)]))
 
 
-# functionDir ejemplo
+# functionDir visual example
 '''
     "global": {
         "type": "void",
         "vars": variableTable["global"] -> "i": {
                                                 "type": "int"
                                                 "value": 1
-                                                "address": 0
                                             }
                                             ...
     }
@@ -142,11 +102,10 @@ for i in ty:
         "vars": variableTable["main"] -> "c": {
                                               "type": "char"
                                               "value": "h"
-                                              "address": 2000
                                          }
                                          ...
     }
-    "funcion_uno": {
+    "uno": {
         "type": "int",
         "params": Queue[int, int, float]
         "paramsLength": len(params)

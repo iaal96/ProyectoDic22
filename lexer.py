@@ -1,6 +1,6 @@
-import sys
 import ply.lex as lex 
 
+#Palabras Reservadas
 reserved = {
     'programa': 'PROGRAMA',
     'principal': 'PRINCIPAL',
@@ -82,14 +82,15 @@ t_CST_CHAR      = r'("(\\"|[^"])?")|(\'(\\\'|[^\'])?\')'
 t_CST_STRING    = r'("(\\"|[^"])*")|(\'(\\\'|[^\'])*\')'
 t_COMMENT_TEXT  = r'%%.*\n'
 
+#Ignorados
+t_ignore = " \t\r"
+
+#ID
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     if t.value in reserved:
         t.type = reserved[t.value]
     return t
-
-#Ignorados
-t_ignore = " \t\r"
 
 def t_newline(t):
     r'\n+'
