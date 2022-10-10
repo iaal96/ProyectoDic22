@@ -549,7 +549,7 @@ def p_addRead(t):
 	'addRead : '
 	#Genera cuadruplo Read
 	if t[-1] in variableTable[currentScope] or t[-1] in variableTable["global"]:
-		temp_quad = Quadruple("read", '_', '_', t[-1])
+		temp_quad = Quadruple("lee", '_', '_', t[-1])
 		Quadruples.push_quad(temp_quad)
 	else:
 		Error.undefined_variable(t[-1], t.lexer.lineno)
@@ -568,7 +568,7 @@ def p_printFunction2(t):
 def p_addPrint(t):
 	'addPrint : '
 	#Genera cuadruplo print
-	temp_quad = Quadruple("print", '_', '_', operands.pop())
+	temp_quad = Quadruple("imprime", '_', '_', operands.pop())
 	Quadruples.push_quad(temp_quad)
 	types.pop()
 
@@ -581,7 +581,7 @@ def p_print_param(t):
 def p_addPrintString(t):
 	'addPrintString : '
 	#Agrega string al cuadruplo print
-	temp_quad = Quadruple("print", '_', '_', t[-1])
+	temp_quad = Quadruple("imprime", '_', '_', t[-1])
 	Quadruples.push_quad(temp_quad)
 
 def p_module(t):
@@ -634,7 +634,7 @@ def p_moduleFunction(t):
 if len(sys.argv) > 1:
 	f = open(sys.argv[1], "r")
 else:
-	f = open("prog.txt", "r")
+	f = open("test.txt", "r")
 program = f.read()
 
 parser = yacc.yacc()
