@@ -27,7 +27,9 @@ def p_program(t):
 	#operands.print()
 	#types.print()
 	#operators.print()
+	#Imprimir cuadruplos
 	Quadruples.print_all()
+	#Imprimir tabla de variables
 	variableTable.clear()
 
 #GlobalTable: Inicializar programa y crear variableTable
@@ -41,7 +43,8 @@ def p_globalTable(t):
 	# Definir tipo y variables como referencia a variableTable["global"]
 	functionDir[currentScope]["type"] = "void"
 	functionDir[currentScope]["vars"] = variableTable[currentScope]
-    
+
+#Dar error sintactico    
 def p_error(t):
 	Error.syntax(t.value, t.lexer.lineno)
 
@@ -79,10 +82,12 @@ def p_assignment(t):
 	#Si id esta en currentScope, generar cuadruplo y asignar su valor en varTable
 	if t[1] in variableTable[currentScope]:
 		if types.pop() == variableTable[currentScope][t[1]]["type"]:
+			#Genera cuadruplo
 			temp_quad = Quadruple("=", operands.peek(), '_', t[1])
 			Quadruples.push_quad(temp_quad)
 			variableTable[currentScope][t[1]]["value"] = operands.pop()
 		else:
+			#Type mismatch
 			Error.type_mismatch(t[1],t.lexer.lineno - 1)
 	#Si id esta en globalScope, generar cuadruplo y asignar su valor en varTable
 	elif t[1] in variableTable["global"]:
@@ -91,8 +96,10 @@ def p_assignment(t):
 			Quadruples.push_quad(temp_quad)
 			variableTable["global"][t[1]]["value"] = operands.pop()
 		else:
+			#Type mismatch
 			Error.type_mismatch(t[1],t.lexer.lineno - 1)
 	else:
+		#Si la variable no esta en varTable, dar error variable indefinida.
 		Error.undefined_variable(t[1], t.lexer.lineno - 1)
 
 #Declaration: Asignar cuadruplo start para una funcion.
@@ -125,26 +132,37 @@ def p_if(t):
 #Jump Quad if: Checar tipo y valor de la expresion y generar cuadruplo para "saltar"
 def p_createJQif(t):
 	'createJQif : '
+	#Sacar tipo de la expresion de la pila de tipos
 	result_type = types.pop()
 	#Checar tipo y valor de la expresion evaluada y generar cuadruplo
 	if result_type == "int":
+		#Si operands.peek() es BOOLEANO
 		if operands.peek() == 1 or operands.peek() == 0:
+			#Sacar de la pila operandos
 			res = operands.pop()
+			#Generar GOTOF
 			operator = "GOTOF"
+			#Generar cuadruplo
 			temp_quad = Quadruple(operator, res, '_', '_')
+			#Hacer push a la lista de cuadruplos
 			Quadruples.push_quad(temp_quad)
+			#Hacer push al id del cuadruplo y hacer push a pila de saltos
 			Quadruples.push_jump(-1)
 		else: 
+			#Type mismatch
 			Error.type_mismatch(t[1],t.lexer.lineno)
 	else: 
+		#Type mismatch
 		Error.type_mismatch(t[1],t.lexer.lineno)
 
 #Update Jump Quad: Actualiza el cuadruplo con el id del cuadruplo al que debe "saltar"
 def p_updateJQ(t):
 	'updateJQ : '
 	#Actualizar cuadruplos GOTOF
+	#Hacer POP al id del cuadruplo de la pila de saltos
 	tmp_end = Quadruples.pop_jump()
 	tmp_count = Quadruples.next_id
+	#Agrega id del cuadruplo de salto al cuadruplo
 	Quadruples.update_jump_quad(tmp_end, tmp_count)
 
 def p_ifElse(t):
@@ -155,12 +173,17 @@ def p_ifElse(t):
 def p_createJQelse(t):
 	'createJQelse : '
 	#Crear cuadruplo para else
+	#Generar GOTO
 	operator = "GOTO"
 	tmp_quad = Quadruple(operator, '_', '_', '_')
+	#Hacer push a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
+	#Hacer POP al id del cuadruplo de la pila de saltos
 	tmp_false = Quadruples.pop_jump()
 	tmp_count = Quadruples.next_id
+	#Agrega id del cuadruplo de salto al cuadruplo
 	Quadruples.update_jump_quad(tmp_false, tmp_count)
+	#Hace push al id del cuadruplo y hace push al jump stack
 	Quadruples.push_jump(-1)
 
 def p_for(t):
@@ -169,6 +192,7 @@ def p_for(t):
 #pushJumpFor: Push al id del cuadruplo para "saltar" al stack de saltos.
 def p_pushJumpFor(t):
 	'pushJumpFor : '
+	#Hace push al id del cuadruplo y hace push al jump stack
 	Quadruples.push_jump(0)
 
 #createQuadFor: Agregar GOTOF a cuadruplos
@@ -187,6 +211,7 @@ def p_forAssignment(t):
 #pushLoop: Push al id del cuadruplo al stack de "saltos"
 def p_pushLoop(t):
 	'pushLoop : '
+	#Hace push al id del siguiente cuadruplo disponible y hace push al jump stack
 	Quadruples.push_jump(1)
 
 #startLoop: Checar tipo del resultado de la expresion, generar cuadruplo y hacer push al id de salto al stack de salto.
@@ -390,34 +415,43 @@ def p_exp(t):
 def p_evaluateTerm(t):
 	'evaluateTerm : '
 	global temp
+	#Si si hay operadores
 	if operators.size() != 0:
 		# Generar cuadruplos para operadores de suma y resta
 		if operators.peek() == "+" or operators.peek() == "-":
-			# Pop a operandos
+			# Pop a pila operandos
 			rOp = operands.pop()
 			lOp = operands.pop()
-			# Pop a operador
+			# Pop a pila de operadores
 			oper = operators.pop()
-			# Pop a tipos
+			# Pop a pila de tipos
 			rType = types.pop()
 			lType = types.pop()
-			# Checar cubo semantico con tipos y operadores
+			# Checar cubo semantico con tipos y operador
 			resType = semanticCube[(lType, rType, oper)]
 			# Checar tipo de resultado y evaluar expresion
+			# Si no marca error
 			if resType != "error":
 				result = 0
+				#Si el operador es +, sumar operandos
 				if oper == "+": 
 					result = float(lOp) + float(rOp)
+				#Si el operador es -, restar operandos
 				if oper == "-": 
 					result = float(lOp) - float(rOp)
+				#Si resultado modulo 1 es 0, hacer el resultado int.
 				if result % 1 == 0:
 					result = int(result)
 				# Generar cuadruplo para expresion
 				temp_quad = Quadruple(oper, lOp, rOp, result)
+				#Hacer push al cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
+				#Hacer push al resultado a la pila de operandos
 				operands.push(result)
+				#Hacer push al tipo de resultado a la pila de tipos
 				types.push(resType)
 				temp += 1
+			#Si no son compatibles, generar error type mismatch.
 			else:
 				Error.operation_type_mismatch(lOp, rOp, t.lexer.lineno)
 
@@ -441,31 +475,39 @@ def p_term(t):
 def p_evaluateFactor(t):
 	'evaluateFactor : '
 	global temp
+	#Si si hay operadores
 	if operators.size() != 0:
 		# Generar cuadruplos para operadores de multiplicacion y division
 		if operators.peek() == "*" or operators.peek() == "/":
-			# Pop a operandos
+			# Pop a pila de operandos
 			rOp = operands.pop()
 			lOp = operands.pop()
-			# Pop a operadores
+			# Pop a pila de operadores
 			oper = operators.pop()
-			# Pop a tipos
+			# Pop a pila de tipos
 			rType = types.pop()
 			lType = types.pop()
 			# Checar cubo semantico con tipos y operador
 			resType = semanticCube[(lType, rType, oper)]
 			# Checar tipo de resultado y evaluar expresion
+			# Si no marca error
 			if resType != "error":
+				#Si el operador es *, multiplicar operandos
 				if oper == "*": 
 					result = float(lOp) * float(rOp)
+				#Si el operador es /, dividir operandos
 				if oper == "/": 
 					result = float(lOp) / float(rOp)
+				#Si resultado modulo 1 es 0, hacer el resultado int.
 				if result % 1 == 0:
 					result = int(result)
 				# Generar cuadruplo para expresion
 				temp_quad = Quadruple(oper, lOp, rOp, result)
+				#Hacer push del cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
+				#Hace push al resultado a la pila de operandos
 				operands.push(result)
+				#Hace push al tipo del resultado a la pila de tipos
 				types.push(resType)
 				temp += 1
 			else:
@@ -503,11 +545,14 @@ def p_removeFF(t):
 def p_addTypeId(t):
 	'addTypeId : '
 	#Hacer push a los tipos al stack de tipos
+	#Si la variable esta en currentScope, hacer push del tipo a la pila de tipos de la tabla de variables de currentScope
 	if t[-2] in variableTable[currentScope]:
 		types.push(variableTable[currentScope][t[-2]]["type"])
+	#Si la variable esta en globalscope, hacer push del tipo a la pila de tipos de la tabla de variables de globalScope
 	elif t[-2] in variableTable["global"]:
 		types.push(variableTable["global"][t[-2]]["type"])
 	else:
+	#Si no encuentra la variable, marcar error de variable indefinida.
 		Error.undefined_variable(t[-1], t.lexer.lineno)
 
 
@@ -520,17 +565,24 @@ def p_addOperandId(t):
 	'addOperandId : '
 	#Agregar el valor del operando de currentcope al stack de operandos
 	if t[-1] in variableTable[currentScope]:
+		#Si value esta en la tabla de variables de CurrentScope
 		if "value" in variableTable[currentScope][t[-1]]:
+			#Hacer push al operando a la pila de operandos de currentscope
 			operands.push(variableTable[currentScope][t[-1]]["value"])
 		else:
+			#Si no esta, marcar error variable no tiene valor asignado.
 			Error.variable_has_no_assigned_value(t[-1], t.lexer.lineno)
 	#Agregar el valor del operando de global scope al stack de operandos
 	elif t[-1] in variableTable["global"]:
+		#Si value esta en la tabla de variables de global scope
 		if "value" in variableTable["global"][t[-1]]:
+			#Hacer push al operando a la pila de operandos de globalscope
 			operands.push(variableTable["global"][t[-1]]["value"])
 		else:
+			#Si no esta, marcar error variable no tiene valor asignado.
 			Error.variable_has_no_assigned_value(t[-1], t.lexer.lineno)
 	else:
+		#Si no encuentra la variable en ningun scope, marcar error variable indefinida.
 		Error.undefined_variable(t[-1], t.lexer.lineno)
 
 
@@ -547,11 +599,14 @@ def p_id_listFunction(t):
 #addRead: Genera un cuadruplo read y le hace push a la lista de cuadruplos
 def p_addRead(t):
 	'addRead : '
-	#Genera cuadruplo Read
+	#Genera cuadruplo Read, si la variable esta en varTable
 	if t[-1] in variableTable[currentScope] or t[-1] in variableTable["global"]:
+		#Generar cuadruplo
 		temp_quad = Quadruple("lee", '_', '_', t[-1])
+		#Hacer push al cuadruplo a lista de cuadruplos
 		Quadruples.push_quad(temp_quad)
 	else:
+		#Si no esta, dar error variable indefinida
 		Error.undefined_variable(t[-1], t.lexer.lineno)
 
 def p_print(t):
@@ -569,7 +624,9 @@ def p_addPrint(t):
 	'addPrint : '
 	#Genera cuadruplo print
 	temp_quad = Quadruple("imprime", '_', '_', operands.pop())
+	#Hace push al cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(temp_quad)
+	#Pop a la pila de tipos
 	types.pop()
 
 
@@ -582,6 +639,7 @@ def p_addPrintString(t):
 	'addPrintString : '
 	#Agrega string al cuadruplo print
 	temp_quad = Quadruple("imprime", '_', '_', t[-1])
+	#Hace push al cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(temp_quad)
 
 def p_module(t):
