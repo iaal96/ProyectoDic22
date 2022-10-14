@@ -198,14 +198,67 @@ def p_pushJumpFor(t):
 #createQuadFor: Agregar GOTOF a cuadruplos
 def p_createQuadFor(t):
 	'createQuadFor : '
+	#Sacar tipo del resultado de la pila de tipos
+	result_type = types.pop()
+	#Checar tipo y valor de la expresion y agregar cuadruplo al stack
+	#Si tipo resultante es entero
+	if result_type == "int":
+		#Peek a pila de operandos y si es BOOLEANO, 0 o 1
+		if operands.peek() == 1 or operands.peek() == 0:
+			#Hacer pop a pila de operandos y asignar a res
+			res = operands.pop()
+			#Generar GOTOF
+			operator = "GOTOF"
+			#Generar cuadruplo
+			temp_quad = Quadruple(operator, res, '_', '_')
+			#Hacer push del cuadruplo a la lista de cuadruplos
+			Quadruples.push_quad(temp_quad)
+			#Hace push al id del cuadruplo y hacer push a pila de saltos
+			Quadruples.push_jump(-1)
+		#Si no es BOOLEANO, marcar error type mismatch
+		else: 
+			Error.type_mismatch(t[1],t.lexer.lineno)
+	#Si no es entero, generar error type mismatch
+	else: 
+		Error.type_mismatch(t[1],t.lexer.lineno)
 
 #updateQuadFor: Actualizar cuadruplo GOTOF con el id del cuadruplo al cual debe "saltar"
 def p_updateQuadFor(t):
 	'updateQuadFor : '
+	#Actualizar cuadruplo GOTOF cuando termine el for
+	tmp_end = Quadruples.jump_stack.pop()
+	tmp_rtn = Quadruples.jump_stack.pop()
+	#Generar cuadruplo
+	tmp_quad = Quadruple("GOTO", "_", "_", tmp_rtn)
+	#Hacer push del cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+	#Actualiza tmp_count a la cantidad de cuadruplos que haya en la lista de cuadruplos.
+	tmp_count = Quadruples.next_id
+	#Agrega id del cuadruplo de salto al cuadruplo
+	Quadruples.update_jump_quad(tmp_end, tmp_count)
 
 #forAssignment: Agrega iterador a la tabla de constantes y crea una variable iterativa
 def p_forAssignment(t):
 	'forAssignment : ID IGUAL CST_INT'
+	#Checar si el id existe en currentScope y asignar su valor
+	if t[1] in variableTable[currentScope]:
+		#Generar cuadruplo de asignacion
+		temp_quad = Quadruple("=", t[3], '_', t[1])
+		#Push al cuadruplo a la lista del cuadruplos
+		Quadruples.push_quad(temp_quad)
+		#Cambiar valor de la variable en varTable
+		variableTable[currentScope][t[1]]["value"] = t[3]
+	#Checar si el id existe en global scope y asignar su valor
+	elif t[1] in variableTable["global"]:
+		#Generar cuadruplo de asignacion
+		temp_quad = Quadruple("=", t[3], '_', t[1])
+		#Push al cuadruplo a la lista del cuadruplos
+		Quadruples.push_quad(temp_quad)
+		#Cambiar valor de la variable en varTable
+		variableTable["global"][t[1]]["value"] = t[3]
+	else:
+	#Si no existe el id, marcar error variable indefinida
+		Error.undefined_variable(t[1], t.lexer.lineno)
 
 
 #pushLoop: Push al id del cuadruplo al stack de "saltos"
@@ -217,11 +270,42 @@ def p_pushLoop(t):
 #startLoop: Checar tipo del resultado de la expresion, generar cuadruplo y hacer push al id de salto al stack de salto.
 def p_startLoop(t):
 	'startLoop : '
+	#Sacar tipo del resultado de la pila de tipos
+	result_type = types.pop()
+	#Checar tipo y valor de expresion y agregar cuadruplo al stack
+	if result_type == "int":
+		#Si es BOOLEANO
+		if operands.peek() == 1 or operands.peek() == 0:
+			#Pop a pila de operandos y asignar a res
+			res = operands.pop()
+			#Generar Operador GOTOF
+			operator = "GOTOF"
+			# Generar cuadruplo y hacerle push a la lista de cuadruplos
+			tmp_quad = Quadruple(operator, res, "_", "_")
+			Quadruples.push_quad(tmp_quad)
+			# Hacer push al id del cuadruplo y hacer push a pila de saltos
+			Quadruples.push_jump(-1)
+		#Si no es BOOLEANO, marcar error type mismatch.
+		else:
+			Error.type_mismatch(t[1],t.lexer.lineno)
+	#Si el resultado no es INT, marcar error type mismatch
+	else :
+		Error.type_mismatch(t[1],t.lexer.lineno)
 
 #endLoop: Generar cuadruplo despues de que el estatuto de while termine y actualizar el GOTOF con id al final del cuadruplo loop.
 def p_endLoop(t):
 	'endLoop : '
-
+	#Hacer pop del id del cuadruplo que este en la pila de saltos
+	false_jump = Quadruples.pop_jump()
+	#Hacer pop del id del cuadruplo que este en la pila de saltos
+	return_jump = Quadruples.pop_jump()
+	#Generar cuadruplo cuando el while termine
+	tmp_quad = Quadruple("GOTO", "_", "_", return_jump-1)
+	#Hacer push del cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+	next_id = Quadruples.next_id
+	#Actualizar GOTOF
+	Quadruples.update_jump_quad(false_jump, next_id)
 
 def p_comment(t):
 	'comment : COMMENT_TEXT'
@@ -320,12 +404,12 @@ def p_evaluateHyperExp(t):
 	if operators.size() != 0:
 		#Generar cuadruplos para and y or
 		if operators.peek() == "|" or operators.peek() == "&":
-			#Pop a operandos
+			#Pop a pila de operandos
 			rOp = operands.pop()
 			lOp = operands.pop()
-			#Pop a operadores
+			#Pop a pila de operadores
 			oper = operators.pop()
-			#Pop a tipos
+			#Pop a pila de tipos
 			rType = types.pop()
 			lType = types.pop()
 			#Checar cubo semantico con tipos y operador
@@ -335,18 +419,26 @@ def p_evaluateHyperExp(t):
 				result = 0
 				lOp = int(lOp)
 				rOp = int(rOp)
+				#si lOp o rOp no son BOOL, marcar error type mismatch de operacion
 				if (lOp != 0 and lOp != 1) or (rOp != 0 and rOp != 1):
 					Error.operation_type_mismatch(lOp, rOp,t.lexer.lineno)
 				#Evaluar expresion y hacerle push a cuadruplo
+				#Si oper es | hacer OR
 				if oper == "|":
 					result = lOp or rOp
 				else: 
+					#si es & hacer AND
 					result = lOp and rOp
+				#Generar cuadruplo
 				temp_quad = Quadruple(oper, lOp, rOp, result)
+				#Push a cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
+				#Push de resultado a la lista de operandos
 				operands.push(result)
+				#Push del tipo del resultado a la lista de tipos
 				types.push(resType)
 				temp += 1
+			#Si el tipo no es int, dar error type mismatch
 			else:
 				Error.operation_type_mismatch(lOp, rOp,t.lexer.lineno)
 
@@ -371,34 +463,43 @@ def p_evaluateSuperExp(t):
 	if operators.size() != 0:
 		#Generar cuadruplos para operadores de comparacion
 		if operators.peek() == ">" or operators.peek() == "<" or operators.peek() == "<>" or operators.peek() == "==":
-			#Pop a operandos
+			#Pop a pila de operandos
 			rOp = operands.pop()
 			lOp = operands.pop()
-			#Pop a operadores
+			#Pop a pila de operadores
 			oper = operators.pop()
-			#Pop a tipos
+			#Pop a pila de tipos
 			rType = types.pop()
 			lType = types.pop()
 			# Checar cubo semantico para tipos y operador
 			resType = semanticCube[(lType, rType, oper)]
-			# Checar tipo de resultado y evaluar expresion
+			# Checar tipo de resultado y evaluar expresion si no es error
 			if resType != "error":
 				result = 0
+				#Si el operador es >, comparar lOp con rOp para ver si es mayor
 				if oper == ">": 
 					result = float(lOp) > float(rOp)
+				#Si el operador es <, comparar lOp con rOp para ver si es menor
 				if oper == "<": 
 					result = float(lOp) < float(rOp)
+				#Si el operador es <>, comparar lOp con rOp para ver si son diferentes
 				if oper == "<>": 
 					result = float(lOp) != float(rOp)
+				#Si el operador es == , comparar lOp con rOp para ver si son iguales
 				if oper == "==": 
 					result = float(lOp) == float(rOp)
+				#Convertir result a int
 				result = int(result)
 				# Generar cuadruplo para expresion
 				temp_quad = Quadruple(oper, lOp, rOp, result)
+				#Push a cuadruplo a la lista de cuadruplo
 				Quadruples.push_quad(temp_quad)
+				#Push a resultado a la lista de operandos
 				operands.push(result)
+				#Push al tipo del resultado a la pila de tipos
 				types.push(resType)
 				temp += 1
+			#Si el tipo no es int, dar error type mismatch
 			else:
 				Error.operation_type_mismatch(lOp, rOp,t.lexer.lineno)
 
