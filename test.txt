@@ -1,6 +1,18 @@
 programa myprog;
 var int i, j, k;
 
+funcion int uno(int c, int d) {
+    var char x, y;
+    x = 'a';
+    y = 'b';
+}
+
+funcion int dos(int a, int b) {
+    var char x, y;
+    x = 'g';
+    y = 'h';
+}
+
 principal() {
     var int c;
         float k;
@@ -20,4 +32,6 @@ principal() {
     c = 2 < 1;
     c = 1 | 0;
     lee(i);
+    uno(1, 5);
+    dos(3, 4);
 }

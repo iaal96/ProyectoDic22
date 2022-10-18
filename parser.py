@@ -323,7 +323,7 @@ def p_addVarsToTable(t):
 	if t[-1] in variableTable[currentScope]:
 		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
 	else:
-		# Agregar ID actual a variableTable(scope)
+		#Si no existe, Agregar ID actual a variableTable(scope)
 		variableTable[currentScope][t[-1]] = {"type": currentType}
 
 def p_varsComa(t):
@@ -342,6 +342,20 @@ def p_varsArray(t):
 #function: Crea cuadruplo ENDFUNC y define tabla de variables locales.
 def p_function(t):
 	'function : functionType ID addFuncToDir LEFTPAR param RIGHTPAR setParamLength LEFTBRACE declaration statement RIGHTBRACE'
+    #Resetear scope a global cuando se salga del scope de la funcion, eliminar varTable y referenciar en functionDir
+	global currentScope
+    #delete variableTable[currentScope]
+    #delete functionDir[currentScope]["vars"]
+	# Crear cuadruplo endfuc para terminar funcion
+	temp_quad = Quadruple("ENDFUNC", "_", "_", "_")
+	#Hacer push del cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(temp_quad)
+	# Variables temporales = longitud del cuadruplo de funcion al maximo
+	functionDir[currentScope]["varLength"] = Quadruples.function_quads
+	#Resetear function quads
+	Quadruples.function_quads = 0
+	#Regresar scope a global
+	currentScope = "global"
 
 def p_param(t):
 	'''param : primitive ID addFuncParams functionParam
@@ -354,10 +368,22 @@ def p_functionParam(t):
 #addFuncParams: Agrega una lista de tipos de parametros al scope de la funcion.
 def p_addFuncParams(t):
 	'addFuncParams : '
+	# Si parametro de la funcion ya existe en el scope, dar error
+	if t[-1] in variableTable[currentScope]:
+		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
+	else:
+		# Si no existe, agregar parametro de la funcion a variableTable de currentScope
+		variableTable[currentScope][t[-1]] = {"type": currentType}
+		if "params" not in functionDir[currentScope]:
+			functionDir[currentScope]["params"] = Queue()
+		# Insertar currentTypes en params Queue
+		functionDir[currentScope]["params"].enqueue(currentType)
 
 #setParamLength: Asignar el numero de parametros en la funcion
 def p_setParamLength(t):
 	'setParamLength : '
+	#Asignar el numero de parametro de la funcion al tamano del Queue params
+	functionDir[currentScope]["paramsLength"] = functionDir[currentScope]["params"].size()
 
 def p_functionType(t):
 	'''functionType : FUNCION primitive
@@ -387,6 +413,23 @@ def p_addTypeChar(t):
 #addFuncToDir: Verifica tipo de funcion e inserta la funcion al directorio de funciones con tipo, varTable y parametros.
 def p_addFuncToDir(t):
 	'addFuncToDir : '
+	# Si la funcion existe en global scope, dar error redefinicion de variable.
+	if t[-1] in variableTable["global"]:
+		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
+	else:
+		#Si no existe
+		global currentScope
+		global currentType
+		# Agregar funcion a variableTable de currentScope
+		variableTable["global"][t[-1]] = {"type": currentType}
+		# Cambiar scope al nuevo id de la funcion
+		currentScope = t[-1]
+		# Inicializar variableTable y functionDir por nuevo id de la funcion
+		variableTable[currentScope] = {}
+		functionDir[currentScope] = {}
+		# Definir nuevo tipo de funcion y vars como referencia a variableTable[currentScope]
+		functionDir[currentScope]["type"] = currentType
+		functionDir[currentScope]["vars"] = variableTable[currentScope]
 
 def p_hyperExpression(t):
     '''hyperExpression : superExpression evaluateHyperExp opHyperExpression Expression2Nested
@@ -749,26 +792,70 @@ def p_module(t):
 #checkFunctionExists: Verifica que la funcion existe en el directorio de Funciones y le hace push al operador del modulo al stack.
 def p_checkFunctionExists(t):
 	'checkFunctionExists : '
+	#Si la funcion no esta en functionDir, marcar error modulo indefinido
+	if t[-1] not in functionDir:
+		Error.undefined_module(t[-1], t.lexer.lineno)
+	#Si si, asignar nombre a la funcion
+	global funcName
+	funcName = t[-1]
 
 #generateERASize: Crea el cuadruplo ERA con el directorio de la funcion que sera llamada.
 def p_generateERASize(t):
 	'generateERASize : '
+	#Generar tamano ERA pendiente...
+	global funcName
+	#Generar cuadruplo con ERA
+	tmp_quad = Quadruple("ERA", funcName, "_", "_")
+	#Hacer push al cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+	global k
+	k = 1
 
 #nullParam: Lanza error si falta un parametro en una llamada de funcion
 def p_nullParam(t):
 	'nullParam : '
+	global k
+	global funcName
+	#Si params de la funcion es mayor que la cantidad de argumentos que el usuario esta dando, dar error
+	if k < len(functionDir[funcName]["params"].values()):
+		Error.unexpected_number_of_arguments(funcName, t.lexer.lineno)
 
 #generateGosub: Crea el cuadruplo Gosub con la direccion de la funcion a llamar **
 def p_generateGosub(t):
 	'generateGosub : '
+	#Genera cuadruplo con GOSUB
+	tmp_quad = Quadruple("GOSUB", funcName, "_", functionDir[funcName]["start"])
+	#Push al cuadruplo a la lista de cuadruplos.
+	Quadruples.push_quad(tmp_quad)
 
 #generateParam: Crea el cuadruplo PARAM con el opreando que esta siendo leido.
 def p_generateParam(t):
 	'generateParam : '
+	global k
+	#Pop a pila de operandos y se lo asigna a argumento
+	arg = operands.pop()
+	#Pop a la pila de tipos y se lo asigna a tipo de argumento
+	argType = types.pop()
+	#Saca la lista de parametros de la funcion
+	paramList = functionDir[funcName]["params"].values()
+	#Si tiene mas argumentos de los que debe tener, lanzar error
+	if k > len(paramList):
+		Error.unexpected_number_of_arguments(funcName, t.lexer.lineno)
+	#Si los tipos son los correctos
+	if argType == paramList[-k]:
+		#Generar cuadruplo con PARAM
+		tmp_quad = Quadruple("PARAM", arg, '_', "param%d" % k)
+		#Hacer push al cuadruplo a la lista de cuadruplos
+		Quadruples.push_quad(tmp_quad)
+	#Si los argumentos no son del tipo esperado lanzar error type mismatch
+	else:
+		Error.type_mismatch_module(funcName, t.lexer.lineno)
 
 #nextParam: agrega 1 al iterador de param.
 def p_nextParam(t):
 	'nextParam : '
+	global k
+	k += 1
 
 
 def p_statement(t):
