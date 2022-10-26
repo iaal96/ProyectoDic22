@@ -1,23 +1,25 @@
-programa myprog;
+programa test;
 var int i, j, k;
 
 funcion int uno(int c, int d) {
     var char x, y;
-    x = 'a';
-    y = 'b';
+    c = 5;
+    d = 6;
+    regresa(c);
 }
 
 funcion int dos(int a, int b) {
     var char x, y;
-    x = 'g';
-    y = 'h';
+    a = 2;
+    b = 4;
+    regresa(a);
 }
 
 principal() {
     var int c;
         float k;
     c = 4;
-    k = 1 + (2 - 3) * 4 / c;
+    k = 1 + 2 - (3 * 4) / c;
     si (1 > 2) entonces {
         lee(c);
     } sino {
@@ -29,9 +31,6 @@ principal() {
     para c = 1 hasta c < 10 {
         lee(j);
     }
-    c = 2 < 1;
-    c = 1 | 0;
-    lee(i);
-    uno(1, 5);
+    uno(1, 2);
     dos(3, 4);
 }

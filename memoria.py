@@ -1,20 +1,50 @@
-memorytable = {}
+class Memory:
+    def __init__(self):
+        self.ints = []
+        self.floats = []
+        self.chars = []
 
-#Espacio para variables globales
-globalInt = 0
-globalFloat = 1000
-globalChar = 2000
-#globalIntTemp = 3000
-#globalFloatTemp = 4000
-#globalCharTemp = 5000
-#Espacio para variables locales
-localInt = 6000
-localFloat = 7000
-localChar = 8000
-localIntTemp = 9000
-localFloatTemp = 10000
-localCharTemp = 11000
-#Espacio para constantes
-cstInt = 12000
-cstFloat = 13000
-cstChar = 14000
+    def insertInt(self, val, vir_address):
+        real_address = vir_address % 1000
+        if len(self.ints) > real_address:
+            self.ints[real_address] = val
+        else:
+            while len(self.ints) < real_address:
+                self.ints.append(0)
+            self.ints.append(val)
+
+    def insertFloat(self, val, vir_address):
+        real_address = vir_address % 1000
+        if len(self.floats) > real_address:
+            self.floats[real_address] = val
+        else:
+            while len(self.floats) < real_address:
+                self.floats.append(0.0)
+            self.floats.append(val)
+
+    def insertChar(self, val, vir_address):
+        real_address = vir_address % 1000
+        if len(self.chars) > real_address:
+            self.chars[real_address] = val
+        else:
+            while len(self.chars) < real_address:
+                self.chars.append("")
+            self.chars.append(val)
+
+    def getInt(self, vir_address):
+        real_address = vir_address % 1000
+        return self.ints[real_address]
+
+    def getFloat(self, vir_address):
+        real_address = vir_address % 1000
+        return self.floats[real_address]
+
+    def getChar(self, vir_address):
+        real_address = vir_address % 1000
+        return self.chars[real_address]
+
+    def printInts(self):
+        print(self.ints)
+
+    def printChars(self):
+        print(self.chars)

@@ -55,7 +55,23 @@ semanticCube = {}
 operators = Stack()
 operands = Stack()
 types = Stack()
-temp = 1
+arrMatOperands = Stack()
+addresses = {
+    "globalInt": 0,
+    "globalFloat": 1000,
+    "globalChar": 2000,
+    "localInt": 3000,
+    "localFloat": 4000,
+    "localChar": 5000,
+    "temporalInt": 6000,
+    "temporalFloat": 7000,
+    "temporalChar": 8000,
+    "constantInt": 9000,
+    "constantFloat": 10000,
+    "constantChar": 11000,
+    "temporalPoint": 12000,
+    "void": 13000
+}
 ty = {
     0: "int",
     1: "float",
