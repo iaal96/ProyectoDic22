@@ -16,11 +16,11 @@ def p_program(t):
 	# Mostrar variable table y directorio de funciones
 	# print()
 	# for i in functionDir:
-	# 	print("\tfunction name: %s" % i)
-	# 	print("\t\ttype: %s" % functionDir[i]["type"])
+	# 	print("\tnombre de funcion: %s" % i)
+	# 	print("\t\ttipo: %s" % functionDir[i]["type"])
 	# 	print("\t\tvars: %s" % functionDir[i]["vars"])
 	# 	if "params" in functionDir[i]:
-	# 		print("\t\tparams: %s" % functionDir[i]["params"].values())
+	# 		print("\t\tparametros: %s" % functionDir[i]["params"].values())
 	# 		print("\t\tparamsLength: %d" % functionDir[i]["paramsLength"])
 	# 		print("\t\tstart: %d" % functionDir[i]["start"])
 	# 		print("\t\tvarLength: %d" % functionDir[i]["varLength"])
@@ -48,7 +48,9 @@ def p_globalTable(t):
 	functionDir[currentScope]["vars"] = variableTable[currentScope]
 	#Cuadruplo inicial GOTO
 	tmp_quad = Quadruple("GOTO", "_", "_", "_")
+	#Hacer push al cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
+	#Push al id del cuadruplo a pila de saltos
 	Quadruples.push_jump(-1)
 
 #Dar error sintactico    
@@ -71,7 +73,7 @@ def p_mainTable(t):
 	# Definir tipo de funcion y variables como referencia a variableTable["main"]
 	functionDir[currentScope]["type"] = "void"
 	functionDir[currentScope]["vars"] = variableTable[currentScope]
-	#Actualizar cuadruplo inicio para que vaya a PRINCIPAL
+	#Actualizar cuadruplo inicio para que vaya a principal
 	Quadruples.update_jump_quad(Quadruples.pop_jump(), Quadruples.next_id)
 
 
@@ -84,21 +86,30 @@ def p_assignment(t):
 	'assignment : ID dimArray IGUAL hyperExpression PUNTOYCOMA'
 	#Si id esta en currentScope, generar cuadruplo y asignar su valor en varTable
 	if t[1] in variableTable[currentScope]:
+		#Hace pop a pila de tipos, si es igual al tipo de la variable
 		if types.pop() == variableTable[currentScope][t[1]]["type"]:
+			#Saca la direccion de la variable y se la asigna a address
 			address = variableTable[currentScope][t[1]]["address"]
-			#Genera cuadruplo
+			#Genera cuadruplo con direccion
 			temp_quad = Quadruple("=", operands.peek(), '_', address)
+			#Hace push al cuadruplo a la lista del cuadruplo
 			Quadruples.push_quad(temp_quad)
+			#Pop a la pila de operandos y se la asigna como valor a la variable
 			variableTable[currentScope][t[1]]["value"] = operands.pop()
 		else:
-			#Type mismatch
+			#Si no son del mismo tipo, dar error type mismatch
 			Error.type_mismatch(t[1],t.lexer.lineno - 1)
 	#Si id esta en globalScope, generar cuadruplo y asignar su valor en varTable
 	elif t[1] in variableTable["global"]:
+		#Hace pop a pila de tipos, si es igual al tipo de la variable
 		if types.pop() == variableTable["global"][t[1]]["type"]:
+			#Saca la direccion de la variable y se la asigna a address
 			address = variableTable["global"][t[1]]["address"]
+			#Genera cuadruplo con direccion
 			temp_quad = Quadruple("=", operands.peek(), '_', address)
+			#Hace push al cuadruplo a la lista del cuadruplo
 			Quadruples.push_quad(temp_quad)
+			#Pop a la pila de operandos y se la asigna como valor a la variable
 			variableTable["global"][t[1]]["value"] = operands.pop()
 		else:
 			#Type mismatch
@@ -119,12 +130,11 @@ def p_declarationPrim(t):
 	'''declarationPrim : primitive vars PUNTOYCOMA declarationPrim
 					   | '''
 
-#primitive: Cambiar el currentType de declaracion
+#primitive: Cambiar el currentType por declaracion
 def p_primitive(t):
 	'''primitive : INT
 				 | FLOAT
 				 | CHAR '''
-	# Cambiar currentType por declaracion
 	global currentType
 	currentType = t[1]
     
@@ -162,8 +172,9 @@ def p_updateJQ(t):
 	#Actualizar cuadruplos GOTOF
 	#Hacer POP al id del cuadruplo de la pila de saltos
 	tmp_end = Quadruples.pop_jump()
+	#Saca el id del siguiente cuadruplo (al que debe de saltar)
 	tmp_count = Quadruples.next_id
-	#Agrega id del cuadruplo de salto al cuadruplo
+	#Agrega id del cuadruplo al que debe ir el cuadruplo que va a saltar.
 	Quadruples.update_jump_quad(tmp_end, tmp_count)
 
 def p_ifElse(t):
@@ -236,13 +247,19 @@ def p_updateQuadFor(t):
 #forAssignment: Agrega iterador a la tabla de constantes y crea una variable iterativa
 def p_forAssignment(t):
 	'forAssignment : ID IGUAL CST_INT addTypeInt'
+	#Se le asigna constant int al tipo de direccion
 	address_type = "constantInt"
 	cstAddress = 0
+	#Si la variable no esta en tabla de constantes
 	if t[3] not in variableTable["constants"]:
+		#Se le asigna la direccion a la variable
 		variableTable["constants"][t[3]] = {"address": addresses[address_type], "type": "int"}
+		#Se le asigna a cstAddress la direccion dependiendo del tipo que sea la variable
 		cstAddress = addresses[address_type]
+		#Se le suma 1 para darselo a la siguiente variable
 		addresses[address_type] += 1
 	else:
+		#Si si esta, se le asigna la direccion a cstAddress
 		cstAddress = variableTable["constants"][t[3]]["address"]
 	#Checar si el id existe en currentScope y asignar su valor
 		if t[1] in variableTable[currentScope]:
@@ -321,22 +338,29 @@ def p_vars(t):
 #addVarsToTable: Agrega ID actual (y su tipo) a varTable 
 def p_addVarsToTable(t):
 	'addVarsToTable : '
-	#Si el ID ya existe en el scope o global, dar error
+	#Si el ID ya existe en el scope o global, dar error redefinicion de variable
 	if t[-1] in variableTable[currentScope]:
 		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
 	else:
 		# Si no existe, agregar ID a variableTable[scope]
 		variableTable[currentScope][t[-1]] = {"type": currentType}
+		#Si el scope es global, el tipo de direccion va a ser global
 		address_type = "global"
+		#Si no es global, va a ser de tipo local
 		if currentScope != "global":
 			address_type = "local"
+		#Si el tipo es entero, se le asigna la variable va a ser tipo+entero (localInt o globalInt)
 		if currentType == "int":
 			address_type += "Int"
+		#Si el tipo es float, se le asigna la variable va a ser tipo+entero (localFloat o globalFloat)
 		elif currentType == "float":
 			address_type += "Float"
+		#Si el tipo es char, se le asigna la variable va a ser tipo+entero (localChar o globalChar)
 		else:
 			address_type += "Char"
+		#Se le asigna la direccion a la variable 
 		variableTable[currentScope][t[-1]]["address"] = addresses[address_type]
+		#Se le suma 1 para darselo a la siguiente variable que este dentro del scope
 		addresses[address_type] += 1
 		global arrMatId
 		arrMatId = Stack()
@@ -362,7 +386,7 @@ def p_function(t):
 	Quadruples.function_quads = 0
 	#Regresar scope a global
 	currentScope = "global"
-	# Resetear direcciones locales
+	#Una vez que termine la funcion, Resetear direcciones locales 
 	addresses["localInt"] -= addresses["localInt"] % 1000
 	addresses["localFloat"] -= addresses["localFloat"] % 1000
 	addresses["localChar"] -= addresses["localChar"] % 1000
@@ -380,20 +404,27 @@ def p_functionParam(t):
 #addFuncParams: Agrega una lista de tipos de parametros al scope de la funcion.
 def p_addFuncParams(t):
 	'addFuncParams : '
-	# Si parametro de la funcion ya existe en el scope, dar error
+	# Si parametro de la funcion ya existe en el scope, dar error redefinicion de variable
 	if t[-1] in variableTable[currentScope]:
 		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
 	else:
 		# Si no existe, agregar parametro de la funcion a variableTable de currentScope
 		variableTable[currentScope][t[-1]] = {"type": currentType}
+		#Si el tipo es entero
 		if currentType == "int":
+			#Se agrega la direccion tipo localInt
 			variableTable[currentScope][t[-1]]["address"] = addresses["localInt"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["localInt"] += 1
 		elif currentType == "float":
+			#Se agrega la direccion tipo localFloat
 			variableTable[currentScope][t[-1]]["address"] = addresses["localFloat"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["localFloat"] += 1
 		else:
+			#Se agrega la direccion tipo localChar
 			variableTable[currentScope][t[-1]]["address"] = addresses["localChar"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["localChar"] += 1
 		if "params" not in functionDir[currentScope]:
 			functionDir[currentScope]["params"] = Queue()
@@ -419,37 +450,57 @@ def p_cst_primitive(t):
 #addTypeInt: Guardar int en tabla de constantes y hacer push al operando al stack de operandos.
 def p_addTypeInt(t):
 	'addTypeInt : '
+	#Push a int a la pila de tipos
 	types.push("int")
+	#Se le asigna constantInt al tipo de direccion
 	address_type = "constantInt"
+	#Si la variable no esta en la tabla de constantes
 	if t[-1] not in variableTable["constants"]:
+		#Asigna la direccion de tipo entero a la variable
 		variableTable["constants"][t[-1]] = {"address": addresses[address_type], "type": "int"}
+		#Se le hace push a la direccion a la pila de operandos
 		operands.push(variableTable["constants"][t[-1]]["address"])
+		#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 		addresses[address_type] += 1
 	else:
+		#Se le hace push a la direccion a la pila de operandos
 		operands.push(variableTable["constants"][t[-1]]["address"])
 
 #addTypeFloat: Guardar float en tabla de constantes y hacer push al operando al stack de operandos.
 def p_addTypeFloat(t):
 	'addTypeFloat : '
+	#Push a float a la pila de tipos
 	types.push("float")
+	#Se le asigna constantFloat al tipo de direccion
 	address_type = "constantFloat"
+	#Si la variable no esta en la tabla de constantes
 	if t[-1] not in variableTable["constants"]:
+		#Asigna la direccion de tipo entero a la variable
 		variableTable["constants"][t[-1]] = {"address": addresses[address_type], "type": "float"}
+		#Se le hace push a la direccion a la pila de operandos
 		operands.push(variableTable["constants"][t[-1]]["address"])
+		#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 		addresses[address_type] += 1
 	else:
+		#Se le hace push a la direccion a la pila de operandos
 		operands.push(variableTable["constants"][t[-1]]["address"])
 
 #addTypeChar: Guardar char en tabla de constantes y hacer push al operando al stack de operandos.
 def p_addTypeChar(t):
 	'addTypeChar : '
+	#Push a char a la pila de tipos
 	types.push("char")
+	#Se le asigna constantChar al tipo de direccion
 	address_type = "constantChar"
 	if t[-1] not in variableTable["constants"]:
+		#Asigna la direccion de tipo entero a la variable
 		variableTable["constants"][t[-1]] = {"address": addresses[address_type]}
+		#Se le hace push a la direccion a la pila de operandos
 		operands.push(variableTable["constants"][t[-1]]["address"])
+		#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 		addresses[address_type] += 1
 	else:
+		#Se le hace push a la direccion a la pila de operandos
 		operands.push(variableTable["constants"][t[-1]]["address"])
 
 #addFuncToDir: Verifica tipo de funcion e inserta la funcion al directorio de funciones con tipo, varTable y parametros.
@@ -464,15 +515,25 @@ def p_addFuncToDir(t):
 		global currentType
 		# Agregar funcion a variableTable de currentScope
 		variableTable["global"][t[-1]] = {"type": currentType}
+		#Si el tipo es entero
 		if currentType == "int":
+			#Se le asigna el tipo globalInt a la direccion
 			address = addresses["globalInt"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["globalInt"] += 1
+		#Si el tipo es float
 		elif currentType == "float":
+			#Se le asigna el tipo globalFloat a la direccion
 			address = addresses["globalFloat"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["globalFloat"] += 1
+		#Si el tipo es char
 		elif currentType == "char":
+			#Se le asigna el tipo globalChar a la direccion
 			address = addresses["globalChar"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["globalChar"] += 1
+		#Si es void
 		else:
 			address = addresses["void"]
 		variableTable["global"][t[-1]]["address"] = address
@@ -511,20 +572,30 @@ def p_evaluateHyperExp(t):
 			lType = types.pop()
 			#Checar cubo semantico con tipos y operador
 			resType = semanticCube[(lType, rType, oper)]
-			#Checar tipo y valor
+			#Checar tipo y valor, si no hay error
 			if resType != "error":
+				#Asignar temporal a tipo de direccion
 				address_type = "temporal"
+				#Si es entero, el tipo sera temporal entero
 				if resType == "int":
 					address_type += "Int"
+				#Si es float, el tipo sera temporal float
 				elif resType == "float":
 					address_type += "Float"
+				#Si es char, el tipo sera temporal char
 				else:
 					address_type += "Char"
+				#Generar cuadruplo con operando, operadores y direccion
 				temp_quad = Quadruple(oper, lOp, rOp, addresses[address_type])
+				#Hacer push del cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
+				#Hacer push de la direccion a la pila de operandos
 				operands.push(addresses[address_type])
+				#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 				addresses[address_type] += 1
+				#Se le hace push al tipo de resultado a la pila de tipos.
 				types.push(resType)
+			#Dar error type mismatch en operacion
 			else:
 				Error.operation_type_mismatch(lOp, rOp,t.lexer.lineno)
 
@@ -560,18 +631,28 @@ def p_evaluateSuperExp(t):
 			resType = semanticCube[(lType, rType, oper)]
 			# Checar tipo de resultado y evaluar expresion si no es error
 			if resType != "error":
+				#Asignar temporal a tipo de direccion
 				address_type = "temporal"
+				#Si es entero, el tipo sera temporal entero
 				if resType == "int":
 					address_type += "Int"
+				#Si es float, el tipo sera temporal float
 				elif resType == "float":
 					address_type += "Float"
+				#Si es char, el tipo sera temporal char
 				else:
 					address_type += "Char"
+				#Generar cuadruplo con operando, operadores y direccion
 				temp_quad = Quadruple(oper, lOp, rOp, addresses[address_type])
+				#Hacer push del cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
+				#Hacer push de la direccion a la pila de operandos
 				operands.push(addresses[address_type])
+				#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 				addresses[address_type] += 1
+				#Se le hace push al tipo de resultado a la pila de tipos.
 				types.push(resType)
+			#Dar error type mismatch en operacion
 			else:
 				Error.operation_type_mismatch(lOp, rOp, t.lexer.lineno)
 
@@ -604,18 +685,28 @@ def p_evaluateTerm(t):
 			# Checar tipo de resultado y evaluar expresion
 			# Si no marca error
 			if resType != "error":
+				#Asignar temporal a tipo de direccion
 				address_type = "temporal"
+				#Si es entero, el tipo sera temporal entero
 				if resType == "int":
 					address_type += "Int"
+				#Si es float, el tipo sera temporal float
 				elif resType == "float":
 					address_type += "Float"
+				#Si es char, el tipo sera temporal char
 				else:
 					address_type += "Char"
+				#Generar cuadruplo con operando, operadores y direccion
 				temp_quad = Quadruple(oper, lOp, rOp, addresses[address_type])
+				#Hacer push del cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
+				#Hacer push de la direccion a la pila de operandos
 				operands.push(addresses[address_type])
+				#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 				addresses[address_type] += 1
+				#Se le hace push al tipo de resultado a la pila de tipos.
 				types.push(resType)
+			#Dar error type mismatch en operacion
 			else:
 				Error.operation_type_mismatch(lOp, rOp, t.lexer.lineno)
 
@@ -655,18 +746,28 @@ def p_evaluateFactor(t):
 			# Checar tipo de resultado y evaluar expresion
 			# Si no marca error
 			if resType != "error":
+				#Asignar temporal a tipo de direccion
 				address_type = "temporal"
+				#Si es entero, el tipo sera temporal entero
 				if resType == "int":
 					address_type += "Int"
+				#Si es float, el tipo sera temporal float
 				elif resType == "float":
 					address_type += "Float"
+				#Si es char, el tipo sera temporal char
 				else:
 					address_type += "Char"
+				#Generar cuadruplo con operando, operadores y direccion
 				temp_quad = Quadruple(oper, lOp, rOp, addresses[address_type])
+				#Hacer push del cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
+				#Hacer push de la direccion a la pila de operandos
 				operands.push(addresses[address_type])
+				#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 				addresses[address_type] += 1
+				#Se le hace push al tipo de resultado a la pila de tipos.
 				types.push(resType)
+			#Dar error type mismatch en operacion
 			else:
 				Error.operation_type_mismatch(lOp, rOp,t.lexer.lineno)
 				
@@ -701,27 +802,32 @@ def p_removeFF(t):
 #addTypeId: ***
 def p_addTypeId(t):
 	'addTypeId : '
-	# Push types to types stack
+	# Si la variable existe en la tabla de variables
 	if arrMatId.peek() in variableTable[currentScope]:
+		#Hace push al tipo a la pila de tipos
 		types.push(variableTable[currentScope][arrMatId.peek()]["type"])
+	# Si la variable existe en la tabla de variables globales
 	elif arrMatId.peek() in variableTable["global"]:
+		#Hace pusha al tipo de la variable global a la pila de tipos
 		types.push(variableTable["global"][arrMatId.peek()]["type"])
+	#Si la variable no existe marcar error variable indefinida
 	else:
 		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
 
 #addOperandId: ***
 def p_addOperandId(t):
 	'addOperandId : '
-	# Add dimensioned variable ID to a stack
+	# Agrega variable a la pila
 	arrMatId.push(t[-1])
-	# Add currentScope operand value to operand stack
+	# Agrega valor del operando del scope a pila de operandos, si es que existe
 	if arrMatId.peek() in variableTable[currentScope]:
 		operands.push(variableTable[currentScope][arrMatId.peek()]["address"])
 		arrMatScope.push(currentScope)
-	# Add global scope operand value to operand stack
+	# Agrega valor del operando del scope global a pila de operandos, si es que existe
 	elif arrMatId.peek() in variableTable["global"]:
 		operands.push(variableTable["global"][arrMatId.peek()]["address"])
 		arrMatScope.push("global")
+	#Si no existe, marcar error variable indefinida
 	else:
 		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
 
@@ -739,15 +845,23 @@ def p_id_listFunction(t):
 #addRead: Genera un cuadruplo read y le hace push a la lista de cuadruplos
 def p_addRead(t):
 	'addRead : '
-	# Generate read quadruple
+	#Si al variable esta en la tabla de variables
 	if t[-2] in variableTable[currentScope]:
+		#Saca la direccion de la variable y se la asigna a address
 		address = variableTable[currentScope][t[-2]]["address"]
+		#Se crea el cuadruplo LEE con la direccion
 		temp_quad = Quadruple("lee", '_', '_', address)
+		#Se hace push al cuadruplo a la lista de cuadruplos
 		Quadruples.push_quad(temp_quad)
+	#Si al variable esta en la tabla de variables globales
 	elif t[-2] in variableTable["global"]:
+		#Saca la direccion de la variable y se la asigna a address
 		address = variableTable["global"][t[-2]]["address"]
+		#Se crea el cuadruplo LEE con la direccion
 		temp_quad = Quadruple("lee", '_', '_', address)
+		#Se hace push al cuadruplo a la lista de cuadruplos
 		Quadruples.push_quad(temp_quad)
+	#Si no existe, marcar error variable indefinida
 	else:
 		Error.undefined_variable(t[-2], t.lexer.lineno)
 
@@ -779,33 +893,45 @@ def p_print_param(t):
 #addPrintString: Lee un string y lo guarda en la tabla de constantes para luego imprimpirlo con el operador PRINT
 def p_addPrintString(t):
 	'addPrintString : '
-	#Agrega string a cuadruplo de imprime
 	address = 0
 	stringToPrint = t[-1][1:len(t[-1]) - 1]
+	#Si el string no esta en la tabla de variables constantes
 	if stringToPrint not in variableTable["constants"]:
+		#Saca la direccion de la variable y se la asigna a stringToPrint
 		variableTable["constants"][stringToPrint] = {"address": addresses["cChar"]}
+		#Se le asigna esa direccion a address
 		address = variableTable["constants"][stringToPrint]["address"]
+		#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 		addresses["cChar"] += 1
 	else:
+		#Se le asigna la direccion de la variable a address
 		address = variableTable["constants"][stringToPrint]["address"]
-	temp_quad = Quadruple("print", '_', '_', address)
+	#Genera cuadruplo imprime con la direccion del string
+	temp_quad = Quadruple("imprime", '_', '_', address)
+	#Se hace push al cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(temp_quad)
 
 def p_checkVoidType(t):
 	'checkVoidType : '
 	global currentScope
+	#Si el tipo de la funcion es void, marcar error return en funcion void
 	if functionDir[currentScope]["type"] == "void":
 		Error.return_on_void_function(0, t.lexer.lineno)
+	#Saca tipo de la pila de tipos, es igual al tipo de la funcion
 	if types.pop() == functionDir[currentScope]["type"]:
-		tmp_quad = Quadruple("RETURN", "_", "_", operands.pop())
+		#Genera cuadruplo REGRESA
+		tmp_quad = Quadruple("REGRESA", "_", "_", operands.pop())
+		#Hace push al cuadruplo a la lista de cuadruplos
 		Quadruples.push_quad(tmp_quad)
 		global returnMade
 		returnMade = True
+	#Si el tipo no es igual, marcar error type mismatch en return
 	else:
 		Error.type_mismatch_on_return(t.lexer.lineno)
 	
 def p_checkNonVoidType(t):
 	'checkNonVoidType : '
+	#Si el tipo de la funcion no es void, marcar error no hay return en funcion
 	if functionDir[currentScope]["type"] != "void":
 		Error.no_return_on_function(0, t.lexer.lineno)
 
@@ -821,7 +947,9 @@ def p_checkFunctionExists(t):
 	#Si si, asignar nombre a la funcion
 	global funcName
 	funcName = t[-1]
-	operators.push("module")
+	#Hace push a modulo a la pila de operadores
+	operators.push("modulo")
+	#Hacer push del tipo de la funcion a la pila de tipos
 	types.push(functionDir[funcName]["type"])
 
 #generateERASize: Crea el cuadruplo ERA con el directorio de la funcion que sera llamada.
@@ -829,7 +957,7 @@ def p_generateERASize(t):
 	'generateERASize : '
 	#Generar tamano ERA pendiente...
 	global funcName
-	#Generar cuadruplo con ERA
+	#Generar cuadruplo ERA con su direccion
 	tmp_quad = Quadruple("ERA", variableTable["global"][funcName]["address"], "_", "_")
 	#Hacer push al cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
@@ -850,22 +978,39 @@ def p_nullParam(t):
 def p_generateGosub(t):
 	'generateGosub : '
 	global funcName
+	#Generar cuadruplo GOSUB
 	tmp_quad = Quadruple("GOSUB", variableTable["global"][funcName]["address"], "_", functionDir[funcName]["start"])
+	#Hacer push del cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
+	#Si el tipo de la funcion no es void
 	if functionDir[funcName]["type"] != "void":
+		#Si es entero
 		if functionDir[funcName]["type"] == "int":
+			#La direccion va a ser tipo temporal entero
 			tmpAddress = addresses["temporalInt"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["temporalInt"] += 1
+		#Si es float
 		if functionDir[funcName]["type"] == "float":
+			#La direccion va a ser tipo temporal float
 			tmpAddress = addresses["temporalFloat"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["temporalFloat"] += 1
+		#Si es char
 		if functionDir[funcName]["type"] == "char":
+			#La direccion va a ser tipo temporal char
 			tmpAddress = addresses["temporalChar"]
+			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["temporalChar"] += 1
+		#Genera cuadruplo con la direccion de la funcion y tmpAddress
 		tmp_quad = Quadruple("=", variableTable["global"][funcName]["address"], "_", tmpAddress)
+		#Se le hace push al cuadruplo a la lista de cuadruplos
 		Quadruples.push_quad(tmp_quad)
+		#Se le hace push a direccion temporal a la pila de operandos
 		operands.push(tmpAddress)
+		#Se le hace push al tipo de la funcion a la pila de tipos
 		types.push(variableTable["global"][funcName]["type"])
+	#Se saca el operador de la pila de operadores
 	operators.pop()
 
 #generateParam: Crea el cuadruplo PARAM con el opreando que esta siendo leido.
@@ -912,13 +1057,20 @@ def p_dimArray(t):
 
 def p_readIDType(t):
 	'readIDType : '
+	#Se saca el operando de la pila de operandos
 	operands.pop()
+	#Se hace push a la pila de operadores a Mat
 	operators.push("Mat")
+	#Se saca operando de la pila de operandos
 	arrMatOperands.pop()
+	#Si la variable existe en la tabla de variables
 	if arrMatId.peek() in variableTable[currentScope]:
+		#Se saca el tipo de la pila y si no es igual al de la variable, marcar error type mismatch
 		if types.pop() != variableTable[currentScope][arrMatId.peek()]["type"]:
 			Error.type_mismatch(arrMatId.peek(), t.lexer.lineno)
+	#Si la variable existe en la tabla de variables globales
 	elif arrMatId.peek() in variableTable["global"]:
+		#Se saca el tipo de la pila y si no es igual al de la variable, marcar error type mismatch
 		if types.pop() != variableTable["global"][arrMatId.peek()]["type"]:
 			Error.type_mismatch(arrMatId.peek(), t.lexer.lineno)
 
