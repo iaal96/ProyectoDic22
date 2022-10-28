@@ -3,7 +3,7 @@ import ply.yacc as yacc
 from EstructurasDatos import *
 from cuadruplos import *
 from errores import Error
-#from maquinavirtual import maquina_virtual
+from maquinavirtual import maquina_virtual
 
 tokens = lexer.tokens
 arrMatId = Stack()
@@ -12,27 +12,27 @@ arrMatScope = Stack()
 
 def p_program(t):
 	'program : PROGRAMA ID globalTable PUNTOYCOMA declaration programFunc main'
-	print("Compilacion exitosa")
-	# Mostrar variable table y directorio de funciones
-	# print()
-	# for i in functionDir:
-	# 	print("\tnombre de funcion: %s" % i)
-	# 	print("\t\ttipo: %s" % functionDir[i]["type"])
-	# 	print("\t\tvars: %s" % functionDir[i]["vars"])
-	# 	if "params" in functionDir[i]:
-	# 		print("\t\tparametros: %s" % functionDir[i]["params"].values())
-	# 		print("\t\tparamsLength: %d" % functionDir[i]["paramsLength"])
-	# 		print("\t\tstart: %d" % functionDir[i]["start"])
-	# 		print("\t\tvarLength: %d" % functionDir[i]["varLength"])
-	# 	print()
-
-	#operands.print()
-	#types.print()
-	#operators.print()
+	#print("Compilacion exitosa")
+	#Mostrar variable table y directorio de funciones
+	'''print()
+	for i in functionDir:
+		print("\tnombre de funcion: %s" % i)
+		print("\t\ttipo: %s" % functionDir[i]["type"])
+		print("\t\tvars: %s" % functionDir[i]["vars"])
+		if "params" in functionDir[i]:
+			print("\t\tparametros: %s" % functionDir[i]["params"].values())
+			print("\t\tparamsLength: %d" % functionDir[i]["paramsLength"])
+			print("\t\tstart: %d" % functionDir[i]["start"])
+			print("\t\tvarLength: %d" % functionDir[i]["varLength"])
+			print()
+	print("Lista de operandos: ")
+	operands.print()
+	print("Lista de tipos: ")
+	types.print()
 	#Imprimir cuadruplos
 	Quadruples.print_all()
 	#Imprimir tabla de variables
-	#variableTable.clear()
+	#variableTable.clear()'''
 
 #GlobalTable: Inicializar programa y crear variableTable
 def p_globalTable(t):
@@ -1102,4 +1102,4 @@ program = f.read()
 parser = yacc.yacc()
 
 parser.parse(program)
-#maquina_virtual()
+maquina_virtual()

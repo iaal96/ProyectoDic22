@@ -1,0 +1,9 @@
+programa prueba;
+
+principal(){
+    var int c, k, m;
+    c = 5;
+    k = 10;
+    m = c + k;
+    imprime(m);
+}
