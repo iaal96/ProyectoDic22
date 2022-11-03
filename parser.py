@@ -28,11 +28,11 @@ def p_program(t):
 	print("Lista de operandos: ")
 	operands.print()
 	print("Lista de tipos: ")
-	types.print()
+	types.print()'''
 	#Imprimir cuadruplos
-	Quadruples.print_all()
+	#Quadruples.print_all()
 	#Imprimir tabla de variables
-	#variableTable.clear()'''
+	#variableTable.clear()
 
 #GlobalTable: Inicializar programa y crear variableTable
 def p_globalTable(t):
@@ -236,7 +236,7 @@ def p_updateQuadFor(t):
 	tmp_end = Quadruples.jump_stack.pop()
 	tmp_rtn = Quadruples.jump_stack.pop()
 	#Generar cuadruplo
-	tmp_quad = Quadruple("GOTO", "_", "_", tmp_rtn)
+	tmp_quad = Quadruple("GOTOFOR", "_", "_", tmp_rtn)
 	#Hacer push del cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
 	#Actualiza tmp_count a la cantidad de cuadruplos que haya en la lista de cuadruplos.
@@ -610,6 +610,8 @@ def p_superExpression(t):
 def p_opSuperExpression(t):
 	'''opSuperExpression : MAYOR_QUE addOperator
 						 | MENOR_QUE addOperator
+						 | MAYOR_IGUAL addOperator
+						 | MENOR_IGUAL addOperator
 						 | DIFERENTE_A addOperator 
 						 | IGUAL_A addOperator'''
 
@@ -618,7 +620,7 @@ def p_evaluateSuperExp(t):
 	'evaluateSuperExp : '
 	if operators.size() != 0:
 		#Generar cuadruplos para operadores de comparacion
-		if operators.peek() == ">" or operators.peek() == "<" or operators.peek() == "<>" or operators.peek() == "==":
+		if operators.peek() == ">" or operators.peek() == "<" or operators.peek() == "<>" or operators.peek() == "==" or operators.peek() == "<=" or operators.peek() == ">=":
 			#Pop a pila de operandos
 			rOp = operands.pop()
 			lOp = operands.pop()
@@ -936,7 +938,7 @@ def p_checkNonVoidType(t):
 		Error.no_return_on_function(0, t.lexer.lineno)
 
 def p_module(t):
-	'module : ID checkFunctionExists generateERASize LEFTPAR moduleFunction nullParam RIGHTPAR generateGosub PUNTOYCOMA'
+	'module : ID checkFunctionExists generateERASize LEFTPAR moduleFunction nullParam RIGHTPAR generateGosub'
 
 #checkFunctionExists: Verifica que la funcion existe en el directorio de Funciones y le hace push al operador del modulo al stack.
 def p_checkFunctionExists(t):
@@ -982,6 +984,7 @@ def p_generateGosub(t):
 	tmp_quad = Quadruple("GOSUB", variableTable["global"][funcName]["address"], "_", functionDir[funcName]["start"])
 	#Hacer push del cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
+	#PARCHE GUADALUPANO
 	#Si el tipo de la funcion no es void
 	if functionDir[funcName]["type"] != "void":
 		#Si es entero
@@ -1081,7 +1084,7 @@ def p_statement(t):
 				 | read statement
 				 | print statement
 				 | assignment statement
-				 | module statement
+				 | module PUNTOYCOMA statement
 				 | for statement
 				 | while statement 
 				 | checkNonVoidType'''

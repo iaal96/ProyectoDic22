@@ -8,7 +8,12 @@ cstMemMap = {}
 globalMem = Memory()
 localMem = Memory()
 tempMem = Memory()
+
+localMemStack = []
+functionReturnStack = []
+currentFunctionStack = []
 pointerMemStack = []
+
 
 #Sacar valor de la variable que este en la direccion dada
 def getValueFromAddress(address):
@@ -82,6 +87,57 @@ def executeInstruction(quad):
     #Si el operador del cuadruplo es / , ejecuta la instruccion divide
     elif quad.operator == "/":
         return divide(quad)
+    #Si el operador del cuadruplo es >, ejecuta la instruccion mayorQue
+    elif quad.operator == ">":
+        return mayorQue(quad)
+    #Si el operador del cuadruplo es <, ejecuta la instruccion menorQue
+    elif quad.operator == "<":
+        return menorQue(quad)
+    #Si el operador del cuadruplo es >=, ejecuta la instruccion mayorIgual
+    elif quad.operator == ">=":
+        return mayorIgual(quad)
+    #Si el operador del cuadruplo es <=, ejecuta la instruccion menorIgual
+    elif quad.operator == "<=":
+        return menorIgual(quad)
+    #Si el operador del cuadruplo es <>, ejecuta la instruccion diferenteA
+    elif quad.operator == "<>":
+        return diferenteA(quad)
+    #Si el operador del cuadruplo es ==, ejecuta la instruccion igualA
+    elif quad.operator == "==":
+        return igualA(quad)
+    #Si el operador del cuadruplo es | , ejecuta la instruccion OR
+    elif quad.operator == "|":
+        return ORop(quad)
+    #Si el operador del cuadruplo es &, ejecuta la instruccion AND
+    elif quad.operator == "&":
+        return ANDop(quad)
+    #Si el operador del cuadruplo es lee, ejecuta la instruccion leer
+    elif quad.operator == "lee":
+        return leer(quad)
+    #Si el operador del cuadruplo es ENDFUNC, ejecuta la instruccion endFunc
+    elif quad.operator == "ENDFUNC":
+        return endFunc(quad)
+    #Si el operador del cuadruplo es GOTOF, ejecuta la instruccion gotof
+    elif quad.operator == "GOTOF":
+        return gotof(quad)
+    #Si el operador del cuadruplo es GOTO, ejecuta la instruccion goto
+    elif quad.operator == "GOTO":
+        return goto(quad)
+    #Si el operador del cuadruplo es GOTOFOR, ejecuta la instruccion gotofor
+    elif quad.operator == "GOTOFOR":
+        return gotofor(quad)
+    #Si el operador del cuadruplo es GOSUB, ejecuta la instruccion gosub
+    elif quad.operator == "GOSUB":
+        return gosub(quad)
+    #Si el operador del cuadruplo es ERA, ejecuta la instruccion era
+    elif quad.operator == "ERA":
+        return era(quad)
+    #Si el operador del cuadruplo es PARAM, ejecuta la instruccion param
+    elif quad.operator == "PARAM":
+        return param(quad)
+    #Si el operador del cuadruplo es REGRESA, ejecuta la instruccion regresa
+    elif quad.operator == "REGRESA":
+        return regresa(quad)
     #Si el operador del cuadruplo es imprime , ejecuta la instruccion printScreen
     elif quad.operator == "imprime":
         return printScreen(quad)
@@ -369,6 +425,272 @@ def divide(quad):
     #Si la direccion de res_address esta entre 7000-7999, es Float temporal, guardar float en memoria temporal
     elif res_address == 7:
         tempMem.insertFloat(result, quad.result)
+
+def mayorQue(quad):
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Compara lOp con rOp y asignar valor a result
+    result = lOp > rOp
+    #Insertar int (0 o 1) en memoria temporal 
+    tempMem.insertInt(result, quad.result)
+
+def menorQue(quad):
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a  lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Compara lOp con rOp y asignar valor a result
+    result = lOp < rOp
+    #Insertar int (0 o 1) en memoria temporal 
+    tempMem.insertInt(result, quad.result)
+
+def mayorIgual(quad):
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Compara lOp con rOp y asignar valor a result
+    result = lOp >= rOp
+    #Insertar int (0 o 1) en memoria temporal 
+    tempMem.insertInt(result, quad.result)
+
+def menorIgual(quad):
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a  lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Compara lOp con rOp y asignar valor a result
+    result = lOp <= rOp
+    #Insertar int (0 o 1) en memoria temporal 
+    tempMem.insertInt(result, quad.result)
+
+def diferenteA(quad):
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Compara lOp con rOp y asignar valor a result
+    result = (lOp != rOp)
+    #Insertar int (0 o 1) en memoria temporal 
+    tempMem.insertInt(result, quad.result)
+
+def igualA(quad):
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Compara lOp con rOp y asignar valor a result
+    result = (lOp == rOp)
+    #Insertar int (0 o 1) en memoria temporal
+    tempMem.insertInt(result, quad.result)
+
+def ORop(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecjp es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Hace operacion OR con lOp y rOp y se asigna a result
+    result = (lOp or rOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def ANDop(quad):
+     #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        #Saca valor de operando izquierdo y asigna a lOp
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    else:
+        #Saca valor de operando derecho y asigna a rOp
+        rOp = getValueFromAddress(quad.right_operand)
+    #Hace operacion AND con lOp y rOp y se asigna a result
+    result = (lOp and rOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def leer(quad):
+    print("Teclea tu input: ")
+    address = quad.result // 1000
+    input_val = input()
+    if re.match(r'[0-9]+\.[0-9]+', input_val):
+        input_val = float(input_val)
+        if address == 1:
+            globalMem.insertFloat(input_val, quad.result)
+        elif address == 4:
+            localMem.insertFloat(input_val, quad.result)
+    elif re.match(r'[0-9]+', input_val):
+        input_val = int(input_val)
+        if address == 0:
+            globalMem.insertInt(input_val, quad.result)
+        elif address == 3:
+            localMem.insertInt(input_val, quad.result)
+    elif re.match(r'("(\\"|[^"])*")|(\'(\\\'|[^\'])*\')', input_val):
+        input_val = input_val[1]
+        if address == 2:
+            globalMem.insertChar(input_val, quad.result)
+        elif address == 5:
+            localMem.insertChar(input_val, quad.result)
+    elif re.match(r'("(\\"|[^"])?")|(\'(\\\'|[^\'])?\')', input_val):
+        if address == 2:
+            globalMem.insertChar(input_val, quad.result)
+        elif address == 5:
+            localMem.insertChar(input_val, quad.result)
+    else:
+        input_val = input_val[0]
+        if address == 2:
+            globalMem.insertChar(input_val, quad.result)
+        elif address == 5:
+            localMem.insertChar(input_val, quad.result)
+
+def endFunc(quad):
+    global localMem
+    currentFunctionStack.pop()
+    localMem = localMemStack.pop()
+    return functionReturnStack.pop()
+
+def gotof(quad):
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        lOp = getValueFromAddress(quad.left_operand)
+    if lOp == 0:
+        return quad.result
+
+def goto(quad):
+    return quad.result
+
+def gotofor(quad):
+    conditionInt = Quadruples.quadruples[quad.result - 1].result
+    localMem.insertInt(getValueFromAddress(conditionInt) + 1, conditionInt)
+    return quad.result
+
+def gosub(quad):
+    global newMem
+    global localMem
+    localMem = newMem
+    functionReturnStack.append(quad.id + 1)
+    return quad.result
+
+def era(quad):
+    localMemStack.append(localMem)
+    global newMem
+    newMem = Memory()
+    currentFunctionStack.append(quad.left_operand)
+
+def param(quad):
+    address = quad.result // 1000
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    else:
+        lOp = getValueFromAddress(quad.left_operand)
+    if address == 3:
+        newMem.insertInt(lOp, quad.result)
+    if address == 4:
+        newMem.insertFloat(lOp, quad.result)
+    if address == 5:
+        newMem.insertChar(lOp, quad.result)    
+
+def regresa(quad):
+    address = quad.result // 1000
+    rtn_address = Quadruples.quadruples[functionReturnStack[len(functionReturnStack) - 1]].result
+    if quad.result >= 12000:
+        rtnVal = getValueFromAddress(getValueFromAddress(quad.result))
+    else:
+        rtnVal = getValueFromAddress(quad.result)
+    if address == 0 or address == 3 or address == 6 or address == 9:
+        tempMem.insertInt(rtnVal, rtn_address)
+        globalMem.insertInt(rtnVal, currentFunctionStack[len(currentFunctionStack) - 1])
+    elif address == 1 or address == 4 or address == 7 or address == 10:
+        tempMem.insertFloat(rtnVal, rtn_address)
+        globalMem.insertFloat(rtnVal, currentFunctionStack[len(currentFunctionStack) - 1])
+    else:
+        tempMem.insertChar(rtnVal, rtn_address)
+        globalMem.insertChar(rtnVal, currentFunctionStack[len(currentFunctionStack) - 1])
+    newIndex = quad.id + 1
+    if Quadruples.quadruples[newIndex].operator != "ENDFUNC":
+        while Quadruples.quadruples[newIndex].operator != "ENDFUNC":
+            newIndex += 1
+        return newIndex
 
 #Instruccion para imprimir en pantalla
 def printScreen(quad):

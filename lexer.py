@@ -24,6 +24,8 @@ reserved = {
 tokens = [
     'MAYOR_QUE',
     'MENOR_QUE',
+    'MENOR_IGUAL',
+    'MAYOR_IGUAL',
     'AND',
     'OR',
     'DIFERENTE_A',
@@ -56,6 +58,8 @@ tokens = [
 
 t_MAYOR_QUE           = r'>'
 t_MENOR_QUE           = r'<'
+t_MAYOR_IGUAL           = r'>='
+t_MENOR_IGUAL          = r'<='
 t_AND           = r'&'
 t_OR            = r'\|'
 t_DIFERENTE_A      = r'<>'

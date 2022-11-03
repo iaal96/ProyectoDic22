@@ -1,0 +1,11 @@
+programa factorialCic;
+
+principal() {
+    var int c, resultado, num;
+    resultado = 1;
+    lee(num);
+    para c = 1 hasta c <= num {
+        resultado = resultado * c;
+    }
+    imprime(resultado);
+}

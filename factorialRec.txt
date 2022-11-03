@@ -1,0 +1,15 @@
+programa factorialRec;
+
+funcion int factorial(int x) {
+    si (x > 1) entonces {
+        regresa(x * factorial(x - 1));
+    }
+    regresa(1);
+}
+
+principal() {
+    var int x, y;
+    lee(y);
+    x = factorial(y);
+    imprime(x);
+}

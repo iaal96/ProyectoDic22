@@ -77,7 +77,7 @@ ty = {
     1: "float",
     2: "char"
 }
-ops = ["+", "-", "*", "/", ">", "<", "<>", "==", "&", "|"]
+ops = ["+", "-", "*", "/", ">", "<", "<>", "==", "&", "|","<=",">="]
 #print("Cubo Semantico: ")
 for i in ty:
     for j in ty:
@@ -89,7 +89,7 @@ for i in ty:
             if i == 2 or j == 2:
                 semanticCube[(ty[i], ty[j], k)] = "error"
                   # print("%s %s %s = %s" % (types[i], k, types[j], semanticCube[(types[i], types[j], k)]))
-            if k == ">" or k == "<" or k == "<>" or k == "==" or k == "|" or k == "&":
+            if k == ">" or k == "<" or k == "<>" or k == "==" or k == "|" or k == "&" or k == "<=" or k == ">=":
                 if (i == 0 or i == 1) and (j == 0 or j == 1):
                     semanticCube[(ty[i], ty[j], k)] = "int"
                 else:

@@ -1,0 +1,17 @@
+programa fibonacciCic;
+  
+principal() {
+    var int nTermino, primero, segundo, resultado, x;
+    primero= 0;
+    segundo= 1;
+
+    lee(nTermino); 
+
+    para x = 2 hasta x <= nTermino {
+        resultado = primero + segundo;
+        primero = segundo;
+        segundo = resultado;
+    }
+
+    imprime(resultado);
+}
