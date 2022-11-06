@@ -1,11 +1,17 @@
 programa factorialCic;
 
 principal() {
-    var int c, resultado, num;
+    var int resultado, num, x, a, b, c, y;
     resultado = 1;
     lee(num);
-    para c = 1 hasta c <= num {
-        resultado = resultado * c;
+    para x = 1 hasta x <= num {
+        resultado = resultado * x;
     }
     imprime(resultado);
+    lee(y);
+    raizcuadrada(y);
+    lee(a);
+    lee(b);
+    lee(c);
+    cuadratica(a,b,c);
 }

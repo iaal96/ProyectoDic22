@@ -14,7 +14,7 @@ def p_program(t):
 	'program : PROGRAMA ID globalTable PUNTOYCOMA declaration programFunc main'
 	#print("Compilacion exitosa")
 	#Mostrar variable table y directorio de funciones
-	'''print()
+	print()
 	for i in functionDir:
 		print("\tnombre de funcion: %s" % i)
 		print("\t\ttipo: %s" % functionDir[i]["type"])
@@ -25,14 +25,15 @@ def p_program(t):
 			print("\t\tstart: %d" % functionDir[i]["start"])
 			print("\t\tvarLength: %d" % functionDir[i]["varLength"])
 			print()
+	print("\t\tconstants: %s" % variableTable["constants"])
 	print("Lista de operandos: ")
 	operands.print()
 	print("Lista de tipos: ")
-	types.print()'''
+	types.print()
 	#Imprimir cuadruplos
 	Quadruples.print_all()
 	#Imprimir tabla de variables
-	#variableTable.clear()
+	'''variableTable.clear()'''
 
 #GlobalTable: Inicializar programa y crear variableTable
 def p_globalTable(t):
@@ -838,7 +839,7 @@ def p_read(t):
 	'read : LEE LEFTPAR id_list RIGHTPAR PUNTOYCOMA'
 
 def p_id_list(t):
-	'id_list : ID dimArray addRead id_listFunction'
+	'''id_list : ID dimArray addRead id_listFunction'''
 
 def p_id_listFunction(t):
 	'''id_listFunction : COMA id_list
@@ -1086,8 +1087,50 @@ def p_statement(t):
 				 | assignment statement
 				 | module PUNTOYCOMA statement
 				 | for statement
+				 | raizcuadrada statement
+				 | cuadratica statement
 				 | while statement 
 				 | checkNonVoidType'''
+
+
+def p_addRaiz(t):
+	'addRaiz : '
+	#Genera cuadruplo print
+	temp_quad = Quadruple("raizcuadrada", operands.pop(), '_', '_')
+	#Hace push al cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(temp_quad)
+	#Pop a la pila de tipos
+	types.pop()
+
+def p_raiz_param(t):
+	'''raiz_param : hyperExpression addRaiz'''
+
+def p_raizcuadrada(t):
+	'''raizcuadrada : RAIZCUADRADA LEFTPAR raiz_param RIGHTPAR PUNTOYCOMA'''
+
+def p_cuadratica_param1(t):
+	'''cuadratica_param1 : hyperExpression'''
+
+def p_cuadratica_param2(t):
+	'''cuadratica_param2 : hyperExpression'''
+
+def p_cuadratica_param3(t):
+	'''cuadratica_param3 : hyperExpression addCuadratica'''
+
+def p_addCuadratica(t):
+	'addCuadratica : '
+	operando3 = operands.pop()
+	operando2 = operands.pop()
+	operando1 = operands.pop()
+	#Genera cuadruplo print
+	temp_quad = Quadruple("cuadratica", operando1, operando2, operando3)
+	#Hace push al cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(temp_quad)
+	#Pop a la pila de tipos
+	types.pop()
+
+def p_cuadratica(t):
+	'''cuadratica : CUADRATICA LEFTPAR cuadratica_param1 COMA cuadratica_param2 COMA cuadratica_param3 RIGHTPAR PUNTOYCOMA'''
 
 
 def p_moduleFunction(t):

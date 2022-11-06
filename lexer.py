@@ -18,7 +18,9 @@ reserved = {
     'sino': 'SINO',
     'mientras': 'MIENTRAS',
     'hasta': 'HASTA',
-    'para': 'PARA'
+    'para': 'PARA',
+    'raizcuadrada': 'RAIZCUADRADA',
+    'cuadratica':'CUADRATICA'
 }
 
 tokens = [
