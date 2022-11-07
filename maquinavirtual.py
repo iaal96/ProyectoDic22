@@ -116,6 +116,10 @@ def executeInstruction(quad):
         return raizcuadrada(quad)
     elif quad.operator == "cuadratica":
         return cuadratica(quad)
+    elif quad.operator == "pow":
+        return pow(quad)
+    elif quad.operator == "exponencial":
+        return exponencial(quad)
     #Si el operador del cuadruplo es lee, ejecuta la instruccion leer
     elif quad.operator == "lee":
         return leer(quad)
@@ -594,6 +598,8 @@ def ANDop(quad):
         tempMem.insertChar(result, quad.result)
 
 def raizcuadrada(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
     # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
     if quad.left_operand >= 12000:
         lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
@@ -603,7 +609,45 @@ def raizcuadrada(quad):
         lOp = getValueFromAddress(quad.left_operand)
     #Suma operando izquierdo mas operando derecho y guarda en result
     result = math.sqrt(lOp)
-    print(result)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def pow(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    #Si operando derecho tiene otra direccion
+    else:
+        #Saca el valor del operando derecho
+        rOp = getValueFromAddress(quad.right_operand)
+
+    result = math.pow(lOp,rOp)
+
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
 
 def cuadratica(quad):
     #Se divide la direccion entre 1000
@@ -633,8 +677,41 @@ def cuadratica(quad):
     respuesta1 = (-rOp + (math.sqrt(math.pow(rOp, 2) - (4 * lOp * quadResult)))) / (2 * lOp)
     respuesta2 = (-rOp - (math.sqrt(math.pow(rOp, 2) - (4 * lOp * quadResult)))) / (2 * lOp)
 
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
     print(respuesta1)
     print(respuesta2)
+
+
+def exponencial(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.exp(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
 
 def leer(quad):
     print("Teclea tu input: ")

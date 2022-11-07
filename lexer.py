@@ -20,7 +20,9 @@ reserved = {
     'hasta': 'HASTA',
     'para': 'PARA',
     'raizcuadrada': 'RAIZCUADRADA',
-    'cuadratica':'CUADRATICA'
+    'cuadratica':'CUADRATICA',
+    'pow':'POW',
+    'exponencial':'EXPONENCIAL'
 }
 
 tokens = [

@@ -1,0 +1,12 @@
+programa matematicas;
+
+principal() {
+    var int x, a, b, c, y;
+    x = raizcuadrada(pow(raizcuadrada(16),3));
+    imprime(x);
+    y = pow(5,3);
+    imprime(y);
+    a = exponencial(2);
+    imprime(a);
+    cuadratica(2,9,10);
+}

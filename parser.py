@@ -14,7 +14,7 @@ def p_program(t):
 	'program : PROGRAMA ID globalTable PUNTOYCOMA declaration programFunc main'
 	#print("Compilacion exitosa")
 	#Mostrar variable table y directorio de funciones
-	print()
+	'''print()
 	for i in functionDir:
 		print("\tnombre de funcion: %s" % i)
 		print("\t\ttipo: %s" % functionDir[i]["type"])
@@ -29,7 +29,7 @@ def p_program(t):
 	print("Lista de operandos: ")
 	operands.print()
 	print("Lista de tipos: ")
-	types.print()
+	types.print()'''
 	#Imprimir cuadruplos
 	Quadruples.print_all()
 	#Imprimir tabla de variables
@@ -84,7 +84,10 @@ def p_programFunc(t):
 
 #Assignment: Genera cuadruplo en el varTable correspondiente
 def p_assignment(t):
-	'assignment : ID dimArray IGUAL hyperExpression PUNTOYCOMA'
+	'''assignment : ID dimArray IGUAL hyperExpression PUNTOYCOMA
+				  | ID dimArray IGUAL raizcuadrada
+				  | ID dimArray IGUAL pow
+				  | ID dimArray IGUAL exponencial'''
 	#Si id esta en currentScope, generar cuadruplo y asignar su valor en varTable
 	if t[1] in variableTable[currentScope]:
 		#Hace pop a pila de tipos, si es igual al tipo de la variable
@@ -583,7 +586,7 @@ def p_evaluateHyperExp(t):
 				#Si es float, el tipo sera temporal float
 				elif resType == "float":
 					address_type += "Float"
-				#Si es char, el tipo sera temporal char
+				#Si es char, el tipo sera f char
 				else:
 					address_type += "Char"
 				#Generar cuadruplo con operando, operadores y direccion
@@ -869,7 +872,10 @@ def p_addRead(t):
 		Error.undefined_variable(t[-2], t.lexer.lineno)
 
 def p_print(t):
-	'print : IMPRIME LEFTPAR printFunction RIGHTPAR PUNTOYCOMA'
+	'''print : IMPRIME LEFTPAR printFunction RIGHTPAR PUNTOYCOMA
+			 | IMPRIME LEFTPAR raizcuadrada addPrint RIGHTPAR PUNTOYCOMA
+			 | IMPRIME LEFTPAR pow addPrint RIGHTPAR PUNTOYCOMA
+			 | IMPRIME LEFTPAR exponencial addPrint RIGHTPAR PUNTOYCOMA'''
 
 def p_printFunction(t):
 	'''printFunction : print_param COMA printFunction2
@@ -1088,6 +1094,8 @@ def p_statement(t):
 				 | module PUNTOYCOMA statement
 				 | for statement
 				 | raizcuadrada statement
+				 | pow statement
+				 | exponencial statement
 				 | cuadratica statement
 				 | while statement 
 				 | checkNonVoidType'''
@@ -1095,30 +1103,71 @@ def p_statement(t):
 
 def p_addRaiz(t):
 	'addRaiz : '
-	#Genera cuadruplo print
-	temp_quad = Quadruple("raizcuadrada", operands.pop(), '_', '_')
-	#Hace push al cuadruplo a la lista de cuadruplos
+	resType = types.pop()
+#Asignar temporal a tipo de direccion
+	address_type = "temporal"
+	#Si es entero, el tipo sera temporal entero
+	if resType == "int":
+		address_type += "Int"
+		#Si es float, el tipo sera temporal float
+	elif resType == "float":
+		address_type += "Float"
+	#Si es char, el tipo sera temporal char
+	else:
+		address_type += "Char"
+	#Generar cuadruplo con operando, operadores y direccion
+	temp_quad = Quadruple("raizcuadrada", operands.pop(), '_', addresses[address_type])
+	#Hacer push del cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(temp_quad)
-	#Pop a la pila de tipos
-	types.pop()
+	#Hacer push de la direccion a la pila de operandos
+	operands.push(addresses[address_type])
+	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+	addresses[address_type] += 1
+	#Se le hace push al tipo de resultado a la pila de tipos.
+	types.push(resType)
+
 
 def p_raiz_param(t):
-	'''raiz_param : hyperExpression addRaiz'''
+	'''raiz_param : hyperExpression addRaiz
+				  | pow addRaiz
+				  | exponencial addRaiz'''
 
 def p_raizcuadrada(t):
-	'''raizcuadrada : RAIZCUADRADA LEFTPAR raiz_param RIGHTPAR PUNTOYCOMA'''
+	'''raizcuadrada : RAIZCUADRADA LEFTPAR raiz_param RIGHTPAR PUNTOYCOMA
+					| RAIZCUADRADA LEFTPAR raiz_param RIGHTPAR'''
 
 def p_cuadratica_param1(t):
-	'''cuadratica_param1 : hyperExpression'''
+	'''cuadratica_param1 : hyperExpression
+						 | raizcuadrada
+						 | exponencial
+						 | pow'''
 
 def p_cuadratica_param2(t):
-	'''cuadratica_param2 : hyperExpression'''
+	'''cuadratica_param2 : hyperExpression
+						 | raizcuadrada
+						 | exponencial
+						 | pow'''
 
 def p_cuadratica_param3(t):
-	'''cuadratica_param3 : hyperExpression addCuadratica'''
+	'''cuadratica_param3 : hyperExpression addCuadratica
+						 | raizcuadrada
+						 | exponencial
+						 | pow'''
 
 def p_addCuadratica(t):
 	'addCuadratica : '
+	resType = types.pop()
+#Asignar temporal a tipo de direccion
+	address_type = "temporal"
+	#Si es entero, el tipo sera temporal entero
+	if resType == "int":
+		address_type += "Int"
+		#Si es float, el tipo sera temporal float
+	elif resType == "float":
+		address_type += "Float"
+	#Si es char, el tipo sera temporal char
+	else:
+		address_type += "Char"
 	operando3 = operands.pop()
 	operando2 = operands.pop()
 	operando1 = operands.pop()
@@ -1132,6 +1181,80 @@ def p_addCuadratica(t):
 def p_cuadratica(t):
 	'''cuadratica : CUADRATICA LEFTPAR cuadratica_param1 COMA cuadratica_param2 COMA cuadratica_param3 RIGHTPAR PUNTOYCOMA'''
 
+def p_pow(t):
+	'''pow : POW LEFTPAR pow_param1 COMA pow_param2 RIGHTPAR PUNTOYCOMA
+		   | POW LEFTPAR pow_param1 COMA pow_param2 RIGHTPAR'''
+
+def p_pow_param1(t):
+	'''pow_param1 : hyperExpression
+						 | raizcuadrada
+						 | exponencial'''
+
+def p_pow_param2(t):
+	'''pow_param2 : hyperExpression addPow
+						 | raizcuadrada
+						 | exponencial'''
+
+def p_addPow(t):
+	'addPow : '
+	resType = types.pop()
+	rOp = operands.pop()
+	lOp = operands.pop()
+#Asignar temporal a tipo de direccion
+	address_type = "temporal"
+	#Si es entero, el tipo sera temporal entero
+	if resType == "int":
+		address_type += "Int"
+		#Si es float, el tipo sera temporal float
+	elif resType == "float":
+		address_type += "Float"
+	#Si es char, el tipo sera temporal char
+	else:
+		address_type += "Char"
+	#Generar cuadruplo con operando, operadores y direccion
+	temp_quad = Quadruple("pow", lOp, rOp, addresses[address_type])
+	#Hacer push del cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(temp_quad)
+	#Hacer push de la direccion a la pila de operandos
+	operands.push(addresses[address_type])
+	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+	addresses[address_type] += 1
+	#Se le hace push al tipo de resultado a la pila de tipos.
+	types.push(resType)
+
+def p_exponencial(t):
+	'''exponencial : EXPONENCIAL LEFTPAR exp_param RIGHTPAR PUNTOYCOMA
+					| EXPONENCIAL LEFTPAR exp_param RIGHTPAR'''
+
+def p_exp_param(t):
+	'''exp_param : hyperExpression addExponencial
+				  | pow addExponencial
+				  | raizcuadrada addExponencial'''
+
+def p_addExponencial(t):
+	'addExponencial : '
+	resType = types.pop()
+#Asignar temporal a tipo de direccion
+	address_type = "temporal"
+	#Si es entero, el tipo sera temporal entero
+	if resType == "int":
+		address_type += "Int"
+		#Si es float, el tipo sera temporal float
+	elif resType == "float":
+		address_type += "Float"
+	#Si es char, el tipo sera temporal char
+	else:
+		address_type += "Char"
+	#Generar cuadruplo con operando, operadores y direccion
+	temp_quad = Quadruple("exponencial", operands.pop(), '_', addresses[address_type])
+	#Hacer push del cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(temp_quad)
+	#Hacer push de la direccion a la pila de operandos
+	operands.push(addresses[address_type])
+	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+	addresses[address_type] += 1
+	#Se le hace push al tipo de resultado a la pila de tipos.
+	types.push(resType)
 
 def p_moduleFunction(t):
 	'''moduleFunction : hyperExpression generateParam nextParam COMA moduleFunction
