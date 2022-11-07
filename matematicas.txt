@@ -9,6 +9,10 @@ principal() {
     imprime(perimetro.circulo(16));
     imprime(area.cuadrado(5));
     imprime(perimetro.cuadrado(5));
-    imprime(area.triangulo(5,3));
-    imprime(perimetro.triangulo(4,5,10));
+    imprime(area.triangulo(5,4));
+    perimetro.triangulo(5,4,9);
+    imprime(area.rectangulo(4,7));
+    imprime(perimetro.rectangulo(6,10));
+    imprime(area.paralelogramo(5,10));
+    imprime(perimetro.paralelogramo(20,15));
 }

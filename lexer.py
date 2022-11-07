@@ -27,7 +27,9 @@ reserved = {
     'perimetro':'PERIMETRO',
     'circulo':'CIRCULO',
     'cuadrado':'CUADRADO',
-    'triangulo':'TRIANGULO'
+    'triangulo':'TRIANGULO',
+    'rectangulo':'RECTANGULO',
+    'paralelogramo':'PARALELOGRAMO'
 }
 
 tokens = [
