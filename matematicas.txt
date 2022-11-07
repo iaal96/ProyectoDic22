@@ -1,12 +1,14 @@
 programa matematicas;
 
 principal() {
-    var int x, a, b, c, y;
-    x = raizcuadrada(pow(raizcuadrada(16),3));
-    imprime(x);
-    y = pow(5,3);
-    imprime(y);
-    a = exponencial(2);
-    imprime(a);
+    var int x, a, b, c, y, m;
+    imprime(raizcuadrada(pow(raizcuadrada(16),3)));
+    imprime(exponencial(2));
     cuadratica(2,9,10);
+    imprime(area.circulo(5));
+    imprime(perimetro.circulo(16));
+    imprime(area.cuadrado(5));
+    imprime(perimetro.cuadrado(5));
+    imprime(area.triangulo(5,3));
+    imprime(perimetro.triangulo(4,5,10));
 }

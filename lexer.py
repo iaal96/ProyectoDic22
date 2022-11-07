@@ -22,7 +22,12 @@ reserved = {
     'raizcuadrada': 'RAIZCUADRADA',
     'cuadratica':'CUADRATICA',
     'pow':'POW',
-    'exponencial':'EXPONENCIAL'
+    'exponencial':'EXPONENCIAL',
+    'area':'AREA',
+    'perimetro':'PERIMETRO',
+    'circulo':'CIRCULO',
+    'cuadrado':'CUADRADO',
+    'triangulo':'TRIANGULO'
 }
 
 tokens = [
@@ -47,6 +52,7 @@ tokens = [
     'LEFTBRACK',
     'RIGHTBRACK',
     'LEFTBRACE',
+    'PUNTO',
     'RIGHTBRACE',
     'EXCLAMACION',
     'INTERROGACION',
@@ -82,6 +88,7 @@ t_RIGHTBRACK    = r'\]'
 t_LEFTBRACE     = r'\{'
 t_RIGHTBRACE    = r'\}'
 t_EXCLAMACION   = r'!'
+t_PUNTO   = r'.'
 t_INTERROGACION      = r'\?'
 t_SIGNO_DOLAR    = r'\$'
 t_CST_INT       = r'[0-9]+'
