@@ -4,6 +4,10 @@ from EstructurasDatos import variableTable
 from errores import *
 import re
 import math
+import numpy as np
+import scipy.stats as stats 
+import matplotlib.pyplot as plt
+
 cstMemMap = {}
 
 globalMem = Memory()
