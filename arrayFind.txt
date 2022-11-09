@@ -1,0 +1,30 @@
+programa arrayfind;
+var int array1[6];
+
+funcion int find(int a, int j) {
+    si (j < 0) entonces {
+        regresa(0 - 1);
+    }
+
+    si (array1[j] == a) entonces {
+        regresa(j);
+    }
+
+    regresa(find(a, j - 1));
+}
+
+principal() {
+    var int result;
+    
+    %% assign array
+    array1[0] = 2;
+    array1[1] = 8;
+    array1[2] = 5;
+    array1[3] = 33;
+    array1[4] = 25;
+    array1[5] = 9;
+
+    result = find(25, 5);
+
+    imprime(result);
+}

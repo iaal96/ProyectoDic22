@@ -1,0 +1,37 @@
+programa arraySort;
+var int array1[5];
+
+principal() {
+    var int sorted, i, changed, aux;
+    sorted = 0;
+    i = 0;
+    changed = 0;
+
+    %% assign array
+    array1[0] = 2;
+    array1[1] = 8;
+    array1[2] = 5;
+    array1[3] = 33;
+    array1[4] = 25;
+
+    mientras (sorted == 0) {
+        si (array1[i] > array1[i + 1]) entonces {
+            aux = array1[i];
+            array1[i] = i+changed;
+            changed = 1;
+        }
+        si (i == 3) entonces {
+            si (changed == 1) entonces {
+                i = 0;
+                changed = 0;
+            } sino {
+                sorted = 1;
+            }
+        }
+        i = i + 1;
+    }
+
+    para i = 0 hasta i < 5 {
+        imprime(array1[i]);
+    }
+}

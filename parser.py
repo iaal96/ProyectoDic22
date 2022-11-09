@@ -14,7 +14,7 @@ def p_program(t):
 	'program : PROGRAMA ID globalTable PUNTOYCOMA declaration programFunc main'
 	#print("Compilacion exitosa")
 	#Mostrar variable table y directorio de funciones
-	'''print()
+	print()
 	for i in functionDir:
 		print("\tnombre de funcion: %s" % i)
 		print("\t\ttipo: %s" % functionDir[i]["type"])
@@ -29,7 +29,7 @@ def p_program(t):
 	print("Lista de operandos: ")
 	operands.print()
 	print("Lista de tipos: ")
-	types.print()'''
+	types.print()
 	#Imprimir cuadruplos
 	Quadruples.print_all()
 	#Imprimir tabla de variables
@@ -98,38 +98,86 @@ def p_assignment(t):
 				  | ID dimArray IGUAL perimetroRectangulo
 				  | ID dimArray IGUAL areaParalelogramo
 				  | ID dimArray IGUAL perimetroParalelogramo'''
-	#Si id esta en currentScope, generar cuadruplo y asignar su valor en varTable
-	if t[1] in variableTable[currentScope]:
-		#Hace pop a pila de tipos, si es igual al tipo de la variable
+	# Si se tiene mas de 1 arrMatOperand
+	if arrMatOperands.size() > 1:
+		#Sacar tipo
+		types.pop()
+		#Sacar operandos de pila operandos
+		operands.pop()
+		operands.pop()
+		#Sacar operandos de pila de operandos de arreglos
+		assign = arrMatOperands.pop()
+		address = arrMatOperands.pop()
+		#Si no tiene el mismo tipo que la direccion, dar error type mismatch  
+		if assign["type"] != address["type"]:
+			Error.type_mismatch_array_assignment(t.lexer.lineno)
+		#Si no tienen la misma dimension, marcar error de dimensiones.
+		if assign["rows"] != address["rows"] or assign["cols"] != address["cols"]:
+			Error.dimensions_do_not_match(t.lexer.lineno-1)
+		#Si si tienen la misma dimension, generar cuadruplo
+		temp_quad = Quadruple("ARR=", assign, "_", address)
+		#Hacer push al cuadruplo a la lista de cuadruplos
+		Quadruples.push_quad(temp_quad)
+	#Si hay 1 arrMatOperand marcar error
+	elif arrMatOperands.size() == 1:
+		Error.invalid_assignment_to_array_variable(t.lexer.lineno-1)
+		#Si id esta en el varTable del scope
+	elif t[1] in variableTable[currentScope]:
+		#Si son del mismo tipo
 		if types.pop() == variableTable[currentScope][t[1]]["type"]:
-			#Saca la direccion de la variable y se la asigna a address
-			address = variableTable[currentScope][t[1]]["address"]
-			#Genera cuadruplo con direccion
-			temp_quad = Quadruple("=", operands.peek(), '_', address)
-			#Hace push al cuadruplo a la lista del cuadruplo
+			#Si es un arreglo
+			if "rows" in variableTable[currentScope][t[1]]:
+				#Sacar tipo de la pila de tipos
+				types.pop()
+				#Sacar operandos de la pila de operandos
+				assign = operands.pop()
+				address = operands.pop()
+				#Generar cuadruplo
+				temp_quad = Quadruple("=", assign, "_", address)
+			#Si no es arreglo
+			else:
+				#Sacar tipo
+				types.pop()
+				#Sacar direccion de la tabla de variables
+				address = variableTable[currentScope][t[1]]["address"]
+				#Generar cuadruplo
+				temp_quad = Quadruple("=", operands.pop(), '_', address)
+				#Sacar operando de la pila de operandos
+				operands.pop()
+			#Hacer push al cuadruplo a la lista de cuadruplos
 			Quadruples.push_quad(temp_quad)
-			#Pop a la pila de operandos y se la asigna como valor a la variable
-			variableTable[currentScope][t[1]]["value"] = operands.pop()
+		#Si los tipos no son compatibles marcar error type mismatch
 		else:
-			#Si no son del mismo tipo, dar error type mismatch
 			Error.type_mismatch(t[1],t.lexer.lineno - 1)
-	#Si id esta en globalScope, generar cuadruplo y asignar su valor en varTable
+	# Si id esta en global scope
 	elif t[1] in variableTable["global"]:
-		#Hace pop a pila de tipos, si es igual al tipo de la variable
+		#Si los tipos son iguales
 		if types.pop() == variableTable["global"][t[1]]["type"]:
-			#Saca la direccion de la variable y se la asigna a address
-			address = variableTable["global"][t[1]]["address"]
-			#Genera cuadruplo con direccion
-			temp_quad = Quadruple("=", operands.peek(), '_', address)
-			#Hace push al cuadruplo a la lista del cuadruplo
+			#Si es arreglo
+			if "rows" in variableTable["global"][t[1]]:
+				#Sacar tipo de la pila de tipos
+				types.pop()
+				#Sacar operandos
+				assign = operands.pop()
+				address = operands.pop()
+				#Generar cuadruplo
+				temp_quad = Quadruple("=", assign, "_", address)
+			else:
+				#Sacar tipo de la pila de tipos
+				types.pop()
+				#Sacar direccion de la tabla de variables del scope global
+				address = variableTable["global"][t[1]]["address"]
+				#Generar cuadruplo
+				temp_quad = Quadruple("=", operands.pop(), '_', address)
+				#Sacar operando de la pila de oprandos
+				operands.pop()
+			#Hacer push al cuadruplo a la lista de cuadruplos
 			Quadruples.push_quad(temp_quad)
-			#Pop a la pila de operandos y se la asigna como valor a la variable
-			variableTable["global"][t[1]]["value"] = operands.pop()
+		#Si los tipos no son compatibles marcar error type mismatch
 		else:
-			#Type mismatch
 			Error.type_mismatch(t[1],t.lexer.lineno - 1)
+	#Si la variable no existe marcar error de variable indefinida
 	else:
-		#Si la variable no esta en varTable, dar error variable indefinida.
 		Error.undefined_variable(t[1], t.lexer.lineno - 1)
 
 #Declaration: Asignar cuadruplo start para una funcion.
@@ -275,23 +323,30 @@ def p_forAssignment(t):
 	else:
 		#Si si esta, se le asigna la direccion a cstAddress
 		cstAddress = variableTable["constants"][t[3]]["address"]
-	#Checar si el id existe en currentScope y asignar su valor
+	#Si no es arreglo
+	if "rows" not in variableTable[currentScope][t[1]]:
+		# Checar si id existe en currentscope y asignar valor
 		if t[1] in variableTable[currentScope]:
+			#Sacar direccion de varTable y asignar a address
 			address = variableTable[currentScope][t[1]]["address"]
-			#Generar cuadruplo de asignacion
+			#Generar cuadruplo 
 			temp_quad = Quadruple("=", cstAddress, '_', address)
-			#Push al cuadruplo a la lista del cuadruplos
+			#Hacer push al cuadruplo a la lista de cuadruplos
 			Quadruples.push_quad(temp_quad)
-	#Checar si el id existe en global scope y asignar su valor
+		# Check si id existe en global scope y asignar valor
 		elif t[1] in variableTable["global"]:
+			#Sacar direccion de varTable y asignar a address
 			address = variableTable["global"][t[1]]["address"]
-			#Generar cuadruplo de asignacion
+			#Generar cuadruplo 
 			temp_quad = Quadruple("=", t[3], '_', address)
-			#Push al cuadruplo a la lista del cuadruplos
+			#Hacer push al cuadruplo a la lista de cuadruplos
 			Quadruples.push_quad(temp_quad)
+		#Si no existe, marcar error variable indefinida
 		else:
-		#Si no existe el id, marcar error variable indefinida
 			Error.undefined_variable(t[1], t.lexer.lineno)
+	#Si es arreglo marcar error asignacion invalida
+	else:
+		Error.invalid_assignment_to_array_variable(t.lexer.lineno)
 
 
 #pushLoop: Push al id del cuadruplo al stack de "saltos"
@@ -347,7 +402,7 @@ def p_while(t):
 	'while : MIENTRAS pushLoop LEFTPAR hyperExpression RIGHTPAR startLoop LEFTBRACE statement RIGHTBRACE endLoop'
 
 def p_vars(t):
-	'vars : ID addVarsToTable varsComa'
+	'vars : ID addVarsToTable varsArray varsComa'
 
 #addVarsToTable: Agrega ID actual (y su tipo) a varTable 
 def p_addVarsToTable(t):
@@ -384,6 +439,92 @@ def p_varsComa(t):
 	'''varsComa : COMA vars
 				| '''
 
+#Guarda la direccion base de una variable de arreglo en las constantes de la tabla de variables
+def p_varsArray(t):
+	'''varsArray : LEFTBRACK CST_INT addTypeInt RIGHTBRACK setRows varsMatrix 
+				 | '''
+	#Asigna tipo de direccion a global
+	address_type = "global"
+	const_address = "constant"
+	#Si currentScope no es global, cambia el address type a local
+	if currentScope != "global":
+		address_type = "local"
+	#Si tipo es entero, sera localInt y asigna constantInt a const_address
+	if currentType == "int":
+		address_type += "Int"
+		const_address += "Int"
+	#Si tipo es float, sera localFloat y asigna constantFloat a const_address
+	if currentType == "float":
+		address_type += "Float"
+		const_address += "Float"
+	#Si tipo es char, sera localChar y asigna constantChar a const_address
+	if currentType == "char":
+		address_type += "Char"
+		const_address += "Char"
+	global arrMatId
+	#Asigna direccion al arreglo
+	arrMatAddress = variableTable[currentScope][arrMatId.peek()]["address"]
+	#Si el arreglo es de 1 dimension
+	if "rows" in variableTable[currentScope][arrMatId.peek()] and "cols" not in variableTable[currentScope][arrMatId.peek()]:
+		#Asigna el numero de filas a rows
+		rows = variableTable[currentScope][arrMatId.peek()]["rows"]
+		#Asigna como direccion la direccion actual mas la cantidad de filas (o elementos) - 1.
+		addresses[address_type] += rows - 1
+		#Mete la direccion en la tabla de variables
+		variableTable["constants"][arrMatAddress] = {"address": addresses[const_address], "type": "int"}
+		#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+		addresses[const_address] += 1
+	#Si es de 2 dimensiones
+	if "cols" in variableTable[currentScope][arrMatId.peek()]:
+		#Asigna el numero de filas a rows
+		rows = variableTable[currentScope][arrMatId.peek()]["rows"]
+		#Asigna el numero de columnas a cols
+		cols = variableTable[currentScope][arrMatId.peek()]["cols"]
+		#Asigna como direccion la direccion actual mas (rows * cols) - 1.
+		addresses[address_type] += rows * cols - 1
+		#Mete la direccion en la tabla de variables
+		variableTable["constants"][arrMatAddress] = {"address": addresses[const_address], "type": "int"}
+		#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+		addresses[const_address] += 1
+	#Saca el Id de la pila
+	arrMatId.pop()
+
+#Definir cantidad de filas para una variable dimensionada
+def p_setRows(t):
+	'setRows : '
+	global arrMatId
+	#Si la cantidad de filas es un numero positivo
+	if int(t[-3]) > 0:
+		#Le asigna el numero de filas al ID en la tabla de variables
+		variableTable[currentScope][arrMatId.peek()]["rows"] = int(t[-3])
+		#Saca operando de la pila
+		operands.pop()
+		#Saca tipo de la pila
+		types.pop()
+	#Si la cantidad de filas es un numero negativo
+	else:
+		Error.array_size_must_be_positive(arrMatId.peek(), t.lexer.lineno)
+
+#Guarda la direccion base en las constantes de la tabla de variables
+def p_varsMatrix(t):
+	'''varsMatrix : LEFTBRACK CST_INT addTypeInt RIGHTBRACK setCols
+				  | '''
+
+#Definir cantidad de columnas para una variable dimensionada
+def p_setCols(t):
+	'setCols : '
+	global arrMatId
+	#Si el numero de columnas es positivo
+	if int(t[-3]) > 0:
+		#Asigna el numero de columnas al arreglo en la tabla de variables
+		variableTable[currentScope][arrMatId.peek()]["cols"] = int(t[-3])
+		#Sacar operando de la pila
+		operands.pop()
+		#Saca tipo de la pila
+		types.pop()
+	#Si el numero de columnas es negativo, dar error.
+	else:
+		Error.array_size_must_be_positive(arrMatId.peek(), t.lexer.lineno)
 
 #function: Crea cuadruplo ENDFUNC y define tabla de variables locales.
 def p_function(t):
@@ -686,45 +827,94 @@ def p_evaluateTerm(t):
 	'evaluateTerm : '
 	#Si si hay operadores
 	if operators.size() != 0:
-		# Generar cuadruplos para operadores de suma y resta
+		# Si el operador es + o -
 		if operators.peek() == "+" or operators.peek() == "-":
-			# Pop a pila operandos
+			# Sacar operandos de la pila y asignar a rOp y lOp
 			rOp = operands.pop()
 			lOp = operands.pop()
-			# Pop a pila de operadores
+			# Sacar operador de la pila
 			oper = operators.pop()
-			# Pop a pila de tipos
+			# Sacar tipos de la pila y asignar a rType y lType
 			rType = types.pop()
 			lType = types.pop()
 			# Checar cubo semantico con tipos y operador
 			resType = semanticCube[(lType, rType, oper)]
-			# Checar tipo de resultado y evaluar expresion
-			# Si no marca error
+			# Checar y validar tamaño y operandos del arreglo/matriz
+			if arrMatOperands.size() > 1:
+				rId = arrMatOperands.pop()
+				lId = arrMatOperands.pop()
+				# Validar dimensiones
+				# Si no tiene columnas, asigna 1 al numero de columnas
+				if "cols" not in lId:
+					lId["cols"] = 1
+				if "cols" not in rId:
+					rId["cols"] = 1
+				#Si las dimensiones son iguales
+				if lId["rows"] == rId["rows"] and lId["cols"] == rId["cols"]:
+					#Si el operador es +, cambiarlo a ARR+ para cuadruplo
+					if oper == "+":
+						oper = "ARR+"
+					#Si el operador es -, cambiarlo a ARR- para cuadruplo
+					else:
+						oper = "ARR-"
+					#Asignar Arreglo 1 a lOp
+					lOp = {
+						"address": lId["address"],
+						"rows": lId["rows"],
+						"cols": lId["cols"]
+					}
+					#Asignar Arreglo 2 a rOp
+					rOp = {
+						"address": rId["address"],
+						"rows": rId["rows"],
+						"cols": rId["cols"]
+					}
+				#Si las dimensiones no son iguales, marcar error dimensiones no compatibles.
+				else:
+					Error.dimensions_do_not_match(t.lexer.lineno)
+			#Si solo hay 1 operando marcar error operacion invalida.
+			elif arrMatOperands.size() == 1:
+				Error.invalid_operation_in_line(t.lexer.lineno)
+			# Checar tipo del resultado y evaluar la expresion
+			#Si el tipo de resultado no es error
 			if resType != "error":
 				#Asignar temporal a tipo de direccion
 				address_type = "temporal"
-				#Si es entero, el tipo sera temporal entero
+				#Si es int, asignar temporalInt a tipo de direccion
 				if resType == "int":
 					address_type += "Int"
-				#Si es float, el tipo sera temporal float
+				#Si es float, asignar temporalFloat a tipo de direccion
 				elif resType == "float":
 					address_type += "Float"
-				#Si es char, el tipo sera temporal char
+				#Si es int, asignar temporalChar a tipo de direccion
 				else:
 					address_type += "Char"
-				#Generar cuadruplo con operando, operadores y direccion
+				#Genera cuadruplo 
 				temp_quad = Quadruple(oper, lOp, rOp, addresses[address_type])
-				#Hacer push del cuadruplo a la lista de cuadruplos
+				#Hace push al cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
-				#Hacer push de la direccion a la pila de operandos
+				#Hace push a la direccion a la pila de operandos
 				operands.push(addresses[address_type])
-				#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-				addresses[address_type] += 1
-				#Se le hace push al tipo de resultado a la pila de tipos.
+				#Si el operador es ARR+ o ARR-
+				if oper == "ARR+" or oper == "ARR-":
+					#Hace push al arreglo a la pila de operandos
+					arrMatOperands.push({
+						"address": addresses[address_type],
+						"rows": lOp["rows"],
+						"cols": lOp["cols"],
+						"type": resType
+					})
+					#Multiplica filas y columnas para saber en que direccion empieza la siguiente variable
+					addresses[address_type] += lOp["rows"] * lOp["cols"]
+				#Si el operador es otro diferente a ARR+ o ARR-
+				else:
+					#Se le suma 1 a la direccion para darselo a la siguiente variable de ese tipo
+					addresses[address_type] += 1
+				#Hace push al tipo de resultado a la pila de tipos
 				types.push(resType)
-			#Dar error type mismatch en operacion
+			#Si el tipo de resultado da Error dar type mismatch.
 			else:
-				Error.operation_type_mismatch(lOp, rOp, t.lexer.lineno)
+				Error.operation_type_mismatch(t.lexer.lineno)
 
 
 def p_expFunction(t):
@@ -747,45 +937,89 @@ def p_evaluateFactor(t):
 	'evaluateFactor : '
 	#Si si hay operadores
 	if operators.size() != 0:
-		# Generar cuadruplos para operadores de multiplicacion y division
+		# Si el operador es * o /
 		if operators.peek() == "*" or operators.peek() == "/":
-			# Pop a pila de operandos
+			# Sacar operandos de la pila
 			rOp = operands.pop()
 			lOp = operands.pop()
-			# Pop a pila de operadores
+			# Sacar operador de la pila
 			oper = operators.pop()
-			# Pop a pila de tipos
+			# Sacar tipos de la pila y asignar a rType y lType
 			rType = types.pop()
 			lType = types.pop()
-			# Checar cubo semantico con tipos y operador
+			# Checar cubo semantico con operador y tipos
 			resType = semanticCube[(lType, rType, oper)]
-			# Checar tipo de resultado y evaluar expresion
-			# Si no marca error
+			# Checar y validar tamaño y operandos del arreglo/matriz
+			if arrMatOperands.size() > 1:
+				rId = arrMatOperands.pop()
+				lId = arrMatOperands.pop()
+				# Validar dimensiones
+				# Si no tiene columnas, asigna 1 al numero de columnas
+				if "cols" not in lId:
+					lId["cols"] = 1
+				if "cols" not in rId:
+					rId["cols"] = 1
+				#Si las dimensiones son iguales
+				if lId["cols"] == rId["rows"]:
+					#Si el operador es *, cambiarlo a ARR* para cuadruplo
+					if oper == "*":
+						oper = "ARR*"
+					#Si el operador es diferente, marcar error operador invalido en arreglos
+					else:
+						Error.invalid_operator_on_arrays(t.lexer.lineno)
+					#Asignar Arreglo 1 a lOp
+					lOp = {
+						"address": lId["address"],
+						"rows": lId["rows"],
+						"cols": lId["cols"]
+					}
+					#Asignar Arreglo 2 a lOp
+					rOp = {
+						"address": rId["address"],
+						"rows": rId["rows"],
+						"cols": rId["cols"]
+					}
+				#Si no el numero de columnas de arreglo 1 es diferente a numero de renglones del arreglo 2 marcar error operacion invalida
+				else:
+					Error.invalid_operation_in_line(t.lexer.lineno)
+			#Si solo hay 1 operando marcar error operacion invalida.
+			elif arrMatOperands.size() == 1:
+				Error.invalid_operation_in_line(t.lexer.lineno)
+			# Checar tipo de resultado, si no es error
 			if resType != "error":
-				#Asignar temporal a tipo de direccion
+				#Asignar temporal a address type
 				address_type = "temporal"
-				#Si es entero, el tipo sera temporal entero
+				#Si es entero, asignar temporalInt
 				if resType == "int":
 					address_type += "Int"
-				#Si es float, el tipo sera temporal float
+				#Si es float, asignar temporalFloat
 				elif resType == "float":
 					address_type += "Float"
-				#Si es char, el tipo sera temporal char
+				#Si es char, asignar temporal Char
 				else:
 					address_type += "Char"
-				#Generar cuadruplo con operando, operadores y direccion
+				#Generar cuadruplo
 				temp_quad = Quadruple(oper, lOp, rOp, addresses[address_type])
-				#Hacer push del cuadruplo a la lista de cuadruplos
+				#Meter cuadruplo a la lista de cuadruplos
 				Quadruples.push_quad(temp_quad)
-				#Hacer push de la direccion a la pila de operandos
+				#Meter direccion a la pila de operandos
 				operands.push(addresses[address_type])
-				#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-				addresses[address_type] += 1
-				#Se le hace push al tipo de resultado a la pila de tipos.
+				#Si el operador es ARR*
+				if oper == "ARR*":
+					#Mete al arreglo a la pila de operandos
+					arrMatOperands.push({
+						"address": addresses[address_type],
+						"rows": lOp["rows"],
+						"cols": rOp["cols"],
+						"type": resType
+					})
+					#Multiplica filas y columnas para saber en que direccion empieza la siguiente variable
+					addresses[address_type] += lOp["rows"] * rOp["cols"]
+				#Mete el tipo de resultado a la pila de tipos
 				types.push(resType)
-			#Dar error type mismatch en operacion
+			#Si resType es error marcar error type mismatch.
 			else:
-				Error.operation_type_mismatch(lOp, rOp,t.lexer.lineno)
+				Error.operation_type_mismatch(t.lexer.lineno)
 				
 def p_termFunction(t):
 	'''termFunction : MULTIPLICA addOperator term
@@ -830,22 +1064,40 @@ def p_addTypeId(t):
 	else:
 		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
 
-#addOperandId: ***
+#addOperandId: Mete el ID del arreglo a la pila de IDs de array y el scope a la pila de scopes.
 def p_addOperandId(t):
 	'addOperandId : '
 	# Agrega variable a la pila
 	arrMatId.push(t[-1])
-	# Agrega valor del operando del scope a pila de operandos, si es que existe
+	# Agrega direccion del operando del scope a pila de operandos, si es que existe
 	if arrMatId.peek() in variableTable[currentScope]:
 		operands.push(variableTable[currentScope][arrMatId.peek()]["address"])
 		arrMatScope.push(currentScope)
-	# Agrega valor del operando del scope global a pila de operandos, si es que existe
+	# Agrega direccion del operando del scope global a pila de operandos, si es que existe
 	elif arrMatId.peek() in variableTable["global"]:
 		operands.push(variableTable["global"][arrMatId.peek()]["address"])
 		arrMatScope.push("global")
 	#Si no existe, marcar error variable indefinida
 	else:
 		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
+	#Si es un arreglo
+	if "rows" in variableTable[arrMatScope.peek()][t[-1]]:
+		#Si es un arreglo de una dimension (sin columnas)
+		if "cols" not in variableTable[arrMatScope.peek()][t[-1]]:
+			#Asignar arreglo a variable
+			variable = variableTable[arrMatScope.peek()][t[-1]]
+			#Meter operandos a la pila
+			arrMatOperands.push({
+				#Asignar la direccion a address
+				"address": variable["address"],
+				#Asignar la cantidad de filas a rows
+				"rows": variable["rows"],
+				#Asignar 1 a cols
+				"cols": 1
+			})
+		#Si si es arreglo de 2 dimensiones, meterlo a la pila de operandos.
+		else:
+			arrMatOperands.push(variableTable[arrMatScope.peek()][t[-1]])
 
 
 def p_read(t):
@@ -1079,7 +1331,7 @@ def p_nextParam(t):
 	paramNum += 1
 
 def p_dimArray(t):
-	'''dimArray : addOperandId addTypeId LEFTBRACK readIDType hyperExpression RIGHTBRACK
+	'''dimArray : addOperandId addTypeId LEFTBRACK readIDType hyperExpression verifyRows RIGHTBRACK dimMatrix
 				| addOperandId addTypeId '''
 	global arrMatId
 	arrMatId.pop()
@@ -1098,11 +1350,17 @@ def p_readIDType(t):
 		#Se saca el tipo de la pila y si no es igual al de la variable, marcar error type mismatch
 		if types.pop() != variableTable[currentScope][arrMatId.peek()]["type"]:
 			Error.type_mismatch(arrMatId.peek(), t.lexer.lineno)
+		#Si la variable no tiene filas (no es arreglo), marcar error.
+		if "rows" not in variableTable[currentScope][arrMatId.peek()]:
+			Error.variable_not_subscriptable_as_array(arrMatId.peek(), t.lexer.lineno)
 	#Si la variable existe en la tabla de variables globales
 	elif arrMatId.peek() in variableTable["global"]:
 		#Se saca el tipo de la pila y si no es igual al de la variable, marcar error type mismatch
 		if types.pop() != variableTable["global"][arrMatId.peek()]["type"]:
 			Error.type_mismatch(arrMatId.peek(), t.lexer.lineno)
+		#Si la variable no tiene filas (no es arreglo), marcar error.
+		if "rows" not in variableTable["global"][arrMatId.peek()]:
+			Error.variable_not_subscriptable_as_array(arrMatId.peek(), t.lexer.lineno)
 
 def p_statement(t):
 	'''statement : return checkVoidType
@@ -1130,6 +1388,105 @@ def p_statement(t):
 				 | while statement 
 				 | checkNonVoidType'''
 
+#Genera el cuadruplo verify del indice utilizado para verificar que este dentro del rango correcto de numero de filas
+def p_verifyRows(t):
+	'verifyRows : '
+	#Si el tipo no es entero, marcar error type mismatch en indice
+	if types.pop() != "int":
+		Error.type_mismatch_in_index(arrMatId.peek(), t.lexer.lineno)
+	#Saca direccion y asignar a baseAdd (direccion base)
+	baseAdd = variableTable[arrMatScope.peek()][arrMatId.peek()]["address"]
+	#Calcular limite superior
+	upperLim = baseAdd + variableTable[arrMatScope.peek()][arrMatId.peek()]["rows"] - 1
+	#Generar cuadruplo VERIFY con direccion base y limite superior
+	tmp_quad = Quadruple("VERIFY", operands.peek(), baseAdd, upperLim)
+	#Meter cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+
+#Genera cuadruplo para agregar la direccion base y la constante del indice para acceder al espacio de memoria correcto
+def p_dimMatrix(t):
+	'''dimMatrix : LEFTBRACK hyperExpression verifyCols RIGHTBRACK
+				 | checkMatAsArray '''
+	#Sacar operador de la pila
+	operators.pop()
+	#Asignar temporal como tipo de direccion
+	address_type = "temporal"
+	#Si el tipo del ID es int cambiar a temporalInt
+	if variableTable[arrMatScope.peek()][arrMatId.peek()]["type"] == "int":
+		address_type += "Int"
+	#Si el tipo del ID es float cambiar a temporalFloat
+	elif variableTable[arrMatScope.peek()][arrMatId.peek()]["type"] == "float":
+		address_type += "Float"
+	#Si el tipo del ID es Char cambiar a temporalChar
+	else:
+		address_type += "Char"
+	#Sacar direccion del arreglo y asignar a direccion base
+	baseAdd = variableTable[arrMatScope.peek()][arrMatId.peek()]["address"]
+	#Sacar direccion de la direccion base y asignar a addressCst
+	addressCst = variableTable["constants"][baseAdd]["address"]
+	#Generar cuadruplo con temporal pointer
+	tmp_quad = Quadruple("+", addressCst, operands.pop(), addresses["temporalPoint"])
+	#Meter cuadruplo a la pila de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+	#Meter temporal pointer a la pila de operandos
+	operands.push(addresses["temporalPoint"])
+	#Meter tipo del ID a la pila de tipos
+	types.push(variableTable[arrMatScope.peek()][arrMatId.peek()]["type"])
+	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+	addresses["temporalPoint"] += 1
+
+#Genera el cuadruplo verify del indice utilizado para verificar que este dentro del rango correcto de numero de columnas
+def p_verifyCols(t):
+	'verifyCols : '
+	#Si la variable no tiene columnas marcar error
+	if "cols" not in variableTable[arrMatScope.peek()][arrMatId.peek()]:
+		Error.variable_not_subscriptable_as_matrix(arrMatId, t.lexer.lineno)
+	#Si el tipo no es int, marcar error type mismatch
+	if types.pop() != "int":
+		Error.type_mismatch_in_index(arrMatId.peek(),t.lexer.lineno)
+	# Formula para calculo de direccion para arreglos C-style
+	#Saca numero de filas como string y asigna a constant_value
+	constant_value = str(variableTable[arrMatScope.peek()][arrMatId.peek()]["rows"])
+	cstIntAddr = variableTable["constants"][constant_value]["address"]
+	#Genera cuadruplo
+	tmp_quad = Quadruple("*", operands.pop(), cstIntAddr, addresses["temporalInt"])
+	#Mete cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+	#Mete direccion temporal a pila de operandos
+	operands.push(addresses["temporalInt"])
+	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+	addresses["temporalInt"] += 1
+	#Genera cuadruplo
+	tmp_quad = Quadruple("+", operands.pop(), operands.pop(), addresses["temporalInt"])
+	#Mete cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+	#Mete direccion temporal a la pila de operandos
+	operands.push(addresses["temporalInt"])
+	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
+	addresses["temporalInt"] += 1
+	#Sacar direccion base
+	baseAdd = variableTable[currentScope][arrMatId.peek()]["address"]
+	#Calcular limite superior
+	upperLim = baseAdd + variableTable[currentScope][arrMatId.peek()]["rows"] * variableTable[currentScope][arrMatId.peek()]["cols"] - 1
+	#Generar cuadruplo
+	tmp_quad = Quadruple("VERIFY", operands.peek(), baseAdd, upperLim)
+	#Meter cuadruplo a la pila de cuadruplos
+	Quadruples.push_quad(tmp_quad)
+
+#Dar error si una matriz solo tiene un indice 
+def p_checkMatAsArray(t):
+	'checkMatAsArray : '
+	global arrMatId
+	#Si el ID existe en la tabla de variables
+	if arrMatId.peek() in variableTable[currentScope]:
+		#Si solo tiene columnas sin renglones, marcar error
+		if "cols" in variableTable[currentScope][arrMatId.peek()]:
+			Error.matrix_accessed_as_array(arrMatId.peek(), t.lexer.lineno)
+	#Si el ID existe en la tabla de variables globales
+	elif arrMatId.peek() in variableTable["global"]:
+		#Si solo tiene columnas sin renglones, marcar error
+		if "cols" in variableTable["global"][arrMatId.peek()]:
+			Error.matrix_accessed_as_array(arrMatId.peek(), t.lexer.lineno)
 
 def p_addRaiz(t):
 	'addRaiz : '
@@ -1681,4 +2038,4 @@ program = f.read()
 parser = yacc.yacc()
 
 parser.parse(program)
-maquina_virtual()
+#maquina_virtual()
