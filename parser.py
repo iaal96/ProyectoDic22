@@ -87,17 +87,7 @@ def p_assignment(t):
 	'''assignment : ID dimArray IGUAL hyperExpression PUNTOYCOMA
 				  | ID dimArray IGUAL raizcuadrada
 				  | ID dimArray IGUAL pow
-				  | ID dimArray IGUAL exponencial
-				  | ID dimArray IGUAL areaCirculo
-				  | ID dimArray IGUAL perimetroCirculo
-				  | ID dimArray IGUAL areaCuadrado
-				  | ID dimArray IGUAL perimetroCuadrado
-				  | ID dimArray IGUAL areaTriangulo
-				  | ID dimArray IGUAL perimetroTriangulo
-				  | ID dimArray IGUAL areaRectangulo
-				  | ID dimArray IGUAL perimetroRectangulo
-				  | ID dimArray IGUAL areaParalelogramo
-				  | ID dimArray IGUAL perimetroParalelogramo'''
+				  | ID dimArray IGUAL exponencial'''
 	# Si se tiene mas de 1 arrMatOperand
 	if arrMatOperands.size() > 1:
 		#Sacar tipo
@@ -378,7 +368,7 @@ def p_startLoop(t):
 			#Error.type_mismatch(t[1],t.lexer.lineno)
 	#Si el resultado no es INT, marcar error type mismatch
 	else :
-		Error.type_mismatch(t[1],t.lexer.lineno)
+		Error.condition_type_mismatch(t[1],t.lexer.lineno)
 
 #endLoop: Generar cuadruplo despues de que el estatuto de while termine y actualizar el GOTOF con id al final del cuadruplo loop.
 def p_endLoop(t):
@@ -600,7 +590,6 @@ def p_cst_primitive(t):
 	'''cst_primitive : CST_INT addTypeInt
 				| CST_FLOAT addTypeFloat
 				| CST_CHAR addTypeChar'''
-	t[0] = t[1]
 
 #addTypeInt: Guardar int en tabla de constantes y hacer push al operando al stack de operandos.
 def p_addTypeInt(t):
@@ -1137,17 +1126,7 @@ def p_print(t):
 	'''print : IMPRIME LEFTPAR printFunction RIGHTPAR PUNTOYCOMA
 			 | IMPRIME LEFTPAR raizcuadrada addPrint RIGHTPAR PUNTOYCOMA
 			 | IMPRIME LEFTPAR pow addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR exponencial addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR areaCirculo addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR perimetroCirculo addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR areaCuadrado addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR perimetroCuadrado addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR areaTriangulo addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR perimetroTriangulo addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR areaRectangulo addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR perimetroRectangulo addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR areaParalelogramo addPrint RIGHTPAR PUNTOYCOMA
-			 | IMPRIME LEFTPAR perimetroParalelogramo addPrint RIGHTPAR PUNTOYCOMA'''
+			 | IMPRIME LEFTPAR exponencial addPrint RIGHTPAR PUNTOYCOMA'''
 
 def p_printFunction(t):
 	'''printFunction : print_param COMA printFunction2
@@ -1372,19 +1351,9 @@ def p_statement(t):
 				 | module PUNTOYCOMA statement
 				 | for statement
 				 | raizcuadrada statement
-				 | areaCirculo statement
-				 | perimetroCirculo statement
-				 | areaCuadrado statement
-				 | perimetroCuadrado statement
 				 | pow statement
-				 | areaTriangulo statement
-				 | areaRectangulo statement
-				 | perimetroRectangulo statement
-				 | areaParalelogramo statement
-				 | perimetroParalelogramo statement
 				 | exponencial statement
 				 | cuadratica statement
-				 | perimetroTriangulo statement
 				 | while statement 
 				 | checkNonVoidType'''
 
@@ -1398,8 +1367,8 @@ def p_verifyRows(t):
 	baseAdd = variableTable[arrMatScope.peek()][arrMatId.peek()]["address"]
 	#Calcular limite superior
 	upperLim = baseAdd + variableTable[arrMatScope.peek()][arrMatId.peek()]["rows"] - 1
-	#Generar cuadruplo VERIFY con direccion base y limite superior
-	tmp_quad = Quadruple("VERIFY", operands.peek(), baseAdd, upperLim)
+	#Generar cuadruplo VERIFICA con direccion base y limite superior
+	tmp_quad = Quadruple("VERIFICA", operands.peek(), baseAdd, upperLim)
 	#Meter cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
 
@@ -1469,7 +1438,7 @@ def p_verifyCols(t):
 	#Calcular limite superior
 	upperLim = baseAdd + variableTable[currentScope][arrMatId.peek()]["rows"] * variableTable[currentScope][arrMatId.peek()]["cols"] - 1
 	#Generar cuadruplo
-	tmp_quad = Quadruple("VERIFY", operands.peek(), baseAdd, upperLim)
+	tmp_quad = Quadruple("VERIFICA", operands.peek(), baseAdd, upperLim)
 	#Meter cuadruplo a la pila de cuadruplos
 	Quadruples.push_quad(tmp_quad)
 
@@ -1649,385 +1618,6 @@ def p_moduleFunction(t):
 					  | hyperExpression generateParam
 					  | '''
 
-def p_areaCirculo(t):
-	'''areaCirculo : AREA PUNTO CIRCULO LEFTPAR areaCirculo_param RIGHTPAR PUNTOYCOMA
-				   | AREA PUNTO CIRCULO LEFTPAR areaCirculo_param RIGHTPAR'''
-
-def p_areaCirculo_param(t):
-	'''areaCirculo_param : hyperExpression addAreaCirculo'''
-
-def p_addAreaCirculo(t):
-	'addAreaCirculo : '
-	resType = types.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("AreaCirculo", operands.pop(), '_', addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-def p_perimetroCirculo(t):
-	'''perimetroCirculo : PERIMETRO PUNTO CIRCULO LEFTPAR perimetroCirculo_param  RIGHTPAR PUNTOYCOMA
-						| PERIMETRO PUNTO CIRCULO LEFTPAR perimetroCirculo_param  RIGHTPAR'''
-
-def p_perimetroCirculo_param(t):
-	'''perimetroCirculo_param : hyperExpression addPerimetroCirculo'''
-
-def p_addPerimetroCirculo(t):
-	'addPerimetroCirculo : '
-	resType = types.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("PerimetroCirculo", operands.pop(), '_', addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-def p_areaCuadrado(t):
-	'''areaCuadrado : AREA PUNTO CUADRADO LEFTPAR areaCuadrado_param RIGHTPAR PUNTOYCOMA
-				   | AREA PUNTO CUADRADO LEFTPAR areaCuadrado_param RIGHTPAR'''
-
-def p_areaCuadrado_param(t):
-	'''areaCuadrado_param : hyperExpression addAreaCuadrado'''
-
-def p_addAreaCuadrado(t):
-	'addAreaCuadrado : '
-	resType = types.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("AreaCuadrado", operands.pop(), '_', addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-def p_perimetroCuadrado(t):
-	'''perimetroCuadrado : PERIMETRO PUNTO CUADRADO LEFTPAR perimetroCuadrado_param  RIGHTPAR PUNTOYCOMA
-						| PERIMETRO PUNTO CUADRADO LEFTPAR perimetroCuadrado_param  RIGHTPAR'''
-
-def p_perimetroCuadrado_param(t):
-	'''perimetroCuadrado_param : hyperExpression addPerimetroCuadrado'''
-
-def p_addPerimetroCuadrado(t):
-	'addPerimetroCuadrado : '
-	resType = types.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("PerimetroCuadrado", operands.pop(), '_', addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-def p_areaTriangulo(t):
-	'''areaTriangulo : AREA PUNTO TRIANGULO LEFTPAR areaTriangulo_param1 COMA areaTriangulo_param2 RIGHTPAR PUNTOYCOMA
-		   | AREA PUNTO TRIANGULO LEFTPAR areaTriangulo_param1 COMA areaTriangulo_param2 RIGHTPAR'''
-
-def p_areaTriangulo_param1(t):
-	'''areaTriangulo_param1 : hyperExpression
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_areaTriangulo_param2(t):
-	'''areaTriangulo_param2 : hyperExpression addareaTriangulo
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_addareaTriangulo(t):
-	'addareaTriangulo : '
-	resType = types.pop()
-	rOp = operands.pop()
-	lOp = operands.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("AreaTriangulo", lOp, rOp, addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-def p_perimetroTriangulo_param1(t):
-	'''perimetroTriangulo_param1 : hyperExpression
-						 | raizcuadrada
-						 | exponencial
-						 | pow'''
-
-def p_perimetroTriangulo_param2(t):
-	'''perimetroTriangulo_param2 : hyperExpression
-						 | raizcuadrada
-						 | exponencial
-						 | pow'''
-
-def p_perimetroTriangulo_param3(t):
-	'''perimetroTriangulo_param3 : hyperExpression addperimetroTriangulo
-						 | raizcuadrada
-						 | exponencial
-						 | pow'''
-
-def p_addperimetroTriangulo(t):
-	'addperimetroTriangulo : '
-	resType = types.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	operando3 = operands.pop()
-	operando2 = operands.pop()
-	operando1 = operands.pop()
-	#Genera cuadruplo print
-	temp_quad = Quadruple("PerimetroTriangulo", operando1, operando2, operando3 )
-	#Hace push al cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Pop a la pila de tipos
-	types.pop()
-
-def p_perimetroTriangulo(t):
-	'''perimetroTriangulo : PERIMETRO PUNTO TRIANGULO LEFTPAR perimetroTriangulo_param1 COMA perimetroTriangulo_param2 COMA perimetroTriangulo_param3 RIGHTPAR PUNTOYCOMA
-						  | PERIMETRO PUNTO TRIANGULO LEFTPAR perimetroTriangulo_param1 COMA perimetroTriangulo_param2 COMA perimetroTriangulo_param3 RIGHTPAR'''
-
-def p_areaRectangulo(t):
-	'''areaRectangulo : AREA PUNTO RECTANGULO LEFTPAR areaRectangulo_param1 COMA areaRectangulo_param2 RIGHTPAR PUNTOYCOMA
-		   | AREA PUNTO RECTANGULO LEFTPAR areaRectangulo_param1 COMA areaRectangulo_param2 RIGHTPAR'''
-
-def p_areaRectangulo_param1(t):
-	'''areaRectangulo_param1 : hyperExpression
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_areaRectangulo_param2(t):
-	'''areaRectangulo_param2 : hyperExpression addareaRectangulo
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_addareaRectangulo(t):
-	'addareaRectangulo : '
-	resType = types.pop()
-	rOp = operands.pop()
-	lOp = operands.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("AreaRectangulo", lOp, rOp, addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-def p_perimetroRectangulo(t):
-	'''perimetroRectangulo : PERIMETRO PUNTO RECTANGULO LEFTPAR perimetroRectangulo_param1 COMA perimetroRectangulo_param2 RIGHTPAR PUNTOYCOMA
-		   | PERIMETRO PUNTO RECTANGULO LEFTPAR perimetroRectangulo_param1 COMA perimetroRectangulo_param2 RIGHTPAR'''
-
-def p_perimetroRectangulo_param1(t):
-	'''perimetroRectangulo_param1 : hyperExpression
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_perimetroRectangulo_param2(t):
-	'''perimetroRectangulo_param2 : hyperExpression addperimetroRectangulo
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_addperimetroRectangulo(t):
-	'addperimetroRectangulo : '
-	resType = types.pop()
-	rOp = operands.pop()
-	lOp = operands.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("PerimetroRectangulo", lOp, rOp, addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-
-def p_areaParalelogramo(t):
-	'''areaParalelogramo : AREA PUNTO PARALELOGRAMO LEFTPAR areaParalelogramo_param1 COMA areaParalelogramo_param2 RIGHTPAR PUNTOYCOMA
-		   | AREA PUNTO PARALELOGRAMO LEFTPAR areaParalelogramo_param1 COMA areaParalelogramo_param2 RIGHTPAR'''
-
-def p_areaParalelogramo_param1(t):
-	'''areaParalelogramo_param1 : hyperExpression
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_areaParalelogramo_param2(t):
-	'''areaParalelogramo_param2 : hyperExpression addareaParalelogramo
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_addareaParalelogramo(t):
-	'addareaParalelogramo : '
-	resType = types.pop()
-	rOp = operands.pop()
-	lOp = operands.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("AreaParalelogramo", lOp, rOp, addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
-
-def p_perimetroParalelogramo(t):
-	'''perimetroParalelogramo : PERIMETRO PUNTO PARALELOGRAMO LEFTPAR perimetroParalelogramo_param1 COMA perimetroParalelogramo_param2 RIGHTPAR PUNTOYCOMA
-		   | PERIMETRO PUNTO PARALELOGRAMO LEFTPAR perimetroParalelogramo_param1 COMA perimetroParalelogramo_param2 RIGHTPAR'''
-
-def p_perimetroParalelogramo_param1(t):
-	'''perimetroParalelogramo_param1 : hyperExpression
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_perimetroParalelogramo_param2(t):
-	'''perimetroParalelogramo_param2 : hyperExpression addperimetroParalelogramo
-						 | raizcuadrada
-						 | exponencial'''
-
-def p_addperimetroParalelogramo(t):
-	'addperimetroParalelogramo : '
-	resType = types.pop()
-	rOp = operands.pop()
-	lOp = operands.pop()
-#Asignar temporal a tipo de direccion
-	address_type = "temporal"
-	#Si es entero, el tipo sera temporal entero
-	if resType == "int":
-		address_type += "Int"
-		#Si es float, el tipo sera temporal float
-	elif resType == "float":
-		address_type += "Float"
-	#Si es char, el tipo sera temporal char
-	else:
-		address_type += "Char"
-	#Generar cuadruplo con operando, operadores y direccion
-	temp_quad = Quadruple("PerimetroParalelogramo", lOp, rOp, addresses[address_type])
-	#Hacer push del cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Hacer push de la direccion a la pila de operandos
-	operands.push(addresses[address_type])
-	#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-	addresses[address_type] += 1
-	#Se le hace push al tipo de resultado a la pila de tipos.
-	types.push(resType)
 
 if len(sys.argv) > 1:
 	f = open(sys.argv[1], "r")

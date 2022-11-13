@@ -22,14 +22,7 @@ reserved = {
     'raizcuadrada': 'RAIZCUADRADA',
     'cuadratica':'CUADRATICA',
     'pow':'POW',
-    'exponencial':'EXPONENCIAL',
-    'area':'AREA',
-    'perimetro':'PERIMETRO',
-    'circulo':'CIRCULO',
-    'cuadrado':'CUADRADO',
-    'triangulo':'TRIANGULO',
-    'rectangulo':'RECTANGULO',
-    'paralelogramo':'PARALELOGRAMO'
+    'exponencial':'EXPONENCIAL'
 }
 
 tokens = [
