@@ -1,15 +1,18 @@
 programa fibonacciRecursivo;
 
 funcion int fibonacci(int n) { 
-    var int a, b;
-    si (n < 2) entonces {
-        regresa(n); 
+    var int a,b;
+    si(n <= 1) entonces {
+        regresa(n);
     }
-    a = fibonacci(n - 1);
-    b = fibonacci(n - 2);
-    regresa(a + b); 
+    a = fibonacci(n-1);
+    b = fibonacci(n-2);
+    regresa(a+b);
 } 
 
 principal() {
-    imprime(fibonacci(10));
+    var int x;
+    imprime("Valor de x: ");
+    lee(x);
+    imprime(fibonacci(fibonacci(x)));
 }

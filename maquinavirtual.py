@@ -1,10 +1,10 @@
-from cuadruplos import Quadruples
+from cuadruplos import Quadruples,Quadruple
 from memoria import Memory
 from EstructurasDatos import variableTable
 from errores import *
 import re
 import math
-import numpy as np
+#import numpy as np
 
 cstMemMap = {}
 
@@ -176,7 +176,6 @@ def asignar(quad):
     #Dividir direcciones entre 1000 (sin decimal)
     add_type = quad.result // 1000
     lOp = quad.left_operand // 1000
-
     #Si es INT  global
     if add_type == 0:
         #Si la direccion es 12000-12999, sacar int de la direccion a la que apunta el pointer e insertar en memoria global
@@ -338,7 +337,6 @@ def asignar(quad):
         #Si la direccion es 2000-2999, sacar char de memoria global e insertar en memoria temporal.
         elif lOp == 2:
             tempMem.insertChar(globalMem.getInt(quad.left_operand), quad.result)
-
     #Si es POINTER temporal
     if add_type == 12:
         #Saca el valor de la direccion del resultado del cuadruplo
@@ -371,6 +369,11 @@ def suma(quad):
     #Si la direccion de res_address esta entre 7000-7999, es Float temporal, guardar float en memoria temporal
     elif res_address == 7:
         tempMem.insertFloat(result, quad.result)
+    # Para arreglos y matrices (direccion base + index de acceso)
+    elif res_address == 12:
+        while len(pointerMemStack) <= quad.result % 1000:
+            pointerMemStack.append(0)
+        pointerMemStack[quad.result % 1000] = lOp + rOp
 
 #Instruccion para restar
 def resta(quad):
@@ -735,7 +738,6 @@ def exponencial(quad):
         tempMem.insertChar(result, quad.result)
 
 def leer(quad):
-    print("Teclea tu input: ")
     address = quad.result // 1000
     input_val = input()
     if re.match(r'[0-9]+\.[0-9]+', input_val):
@@ -768,10 +770,12 @@ def leer(quad):
         elif address == 5:
             localMem.insertChar(input_val, quad.result)
 
+#Mata la memoria y saca la "migajita"
 def endFunc(quad):
     global localMem
     currentFunctionStack.pop()
     localMem = localMemStack.pop()
+    #Saca migajita
     return functionReturnStack.pop()
 
 def gotof(quad):
@@ -790,19 +794,23 @@ def gotofor(quad):
     localMem.insertInt(getValueFromAddress(conditionInt) + 1, conditionInt)
     return quad.result
 
+#Brinco indondicional que cambia el instruction pointer a una linea especifica de codigo y ademas guarda la "migajita"
 def gosub(quad):
     global newMem
     global localMem
     localMem = newMem
+    #Guarda migajita
     functionReturnStack.append(quad.id + 1)
     return quad.result
 
+#Genera nueva memoria para la llamada de funcion
 def era(quad):
     localMemStack.append(localMem)
     global newMem
     newMem = Memory()
     currentFunctionStack.append(quad.left_operand)
 
+#Asignar el valor actual al parametro
 def param(quad):
     address = quad.result // 1000
     if quad.left_operand >= 12000:
@@ -841,10 +849,10 @@ def regresa(quad):
 def verifica(quad):
     arrType = quad.result // 1000
     if quad.left_operand >= 12000:
-        check = getValueFromAddress(getValueFromAddress(quad.left_operand))
+        verifica = getValueFromAddress(getValueFromAddress(quad.left_operand))
     else:
-        check = getValueFromAddress(quad.left_operand)
-    if check > quad.result - quad.right_operand:
+        verifica = getValueFromAddress(quad.left_operand)
+    if verifica > quad.result - quad.right_operand:
         Error.index_out_of_bounds()
     if arrType == 3:
         localMem.adjustIntArrSize(quad.result)

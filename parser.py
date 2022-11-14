@@ -14,7 +14,7 @@ def p_program(t):
 	'program : PROGRAMA ID globalTable PUNTOYCOMA declaration programFunc main'
 	#print("Compilacion exitosa")
 	#Mostrar variable table y directorio de funciones
-	print()
+	'''print()
 	for i in functionDir:
 		print("\tnombre de funcion: %s" % i)
 		print("\t\ttipo: %s" % functionDir[i]["type"])
@@ -25,12 +25,12 @@ def p_program(t):
 			print("\t\tstart: %d" % functionDir[i]["start"])
 			print("\t\tvarLength: %d" % functionDir[i]["varLength"])
 			print()
-	print("\t\tconstants: %s" % variableTable["constants"])
+	print("\t\Tabla de constantes: %s" % variableTable["constants"])
 	print("Lista de operandos: ")
 	operands.print()
 	print("Lista de tipos: ")
 	types.print()
-	#Imprimir cuadruplos
+	#Imprimir cuadruplos'''
 	Quadruples.print_all()
 	#Imprimir tabla de variables
 	'''variableTable.clear()'''
@@ -56,6 +56,7 @@ def p_globalTable(t):
 
 #Dar error sintactico    
 def p_error(t):
+	'error : '
 	Error.syntax(t.value, t.lexer.lineno)
 
 def p_main(t):
@@ -279,7 +280,7 @@ def p_createQuadFor(t):
 			Quadruples.push_jump(-1)
 	#Si no es entero, generar error type mismatch
 	else: 
-		Error.type_mismatch(t[1],t.lexer.lineno)
+		Error.condition_type_mismatch(t[1],t.lexer.lineno)
 
 #updateQuadFor: Actualizar cuadruplo GOTOF con el id del cuadruplo al cual debe "saltar"
 def p_updateQuadFor(t):
@@ -429,6 +430,12 @@ def p_varsComa(t):
 	'''varsComa : COMA vars
 				| '''
 
+#Guarda la direccion base en las constantes de la tabla de variables
+def p_varsMatrix(t):
+	'''varsMatrix : LEFTBRACK CST_INT addTypeInt RIGHTBRACK setCols
+				  | '''
+
+
 #Guarda la direccion base de una variable de arreglo en las constantes de la tabla de variables
 def p_varsArray(t):
 	'''varsArray : LEFTBRACK CST_INT addTypeInt RIGHTBRACK setRows varsMatrix 
@@ -494,11 +501,6 @@ def p_setRows(t):
 	#Si la cantidad de filas es un numero negativo
 	else:
 		Error.array_size_must_be_positive(arrMatId.peek(), t.lexer.lineno)
-
-#Guarda la direccion base en las constantes de la tabla de variables
-def p_varsMatrix(t):
-	'''varsMatrix : LEFTBRACK CST_INT addTypeInt RIGHTBRACK setCols
-				  | '''
 
 #Definir cantidad de columnas para una variable dimensionada
 def p_setCols(t):
@@ -692,13 +694,83 @@ def p_addFuncToDir(t):
 		functionDir[currentScope]["params"] = Queue()
 
 def p_hyperExpression(t):
-    '''hyperExpression : superExpression evaluateHyperExp opHyperExpression Expression2Nested
-                       | superExpression opMatrix 
+    '''hyperExpression : superExpression evaluateHyperExp opHyperExpression
+                       | superExpression opMatrix evaluateOpMatrix
                        | superExpression evaluateHyperExp'''
 
-def p_Expression2Nested(t):
-    '''Expression2Nested : superExpression evaluateHyperExp opHyperExpression Expression2Nested
-                             | superExpression evaluateHyperExp'''
+def p_evaluateOpMatrix(t):
+	'evaluateOpMatrix : '
+	if operators.size() != 0:
+		if operators.peek() == "!" or operators.peek() == "?" or operators.peek() == "$":
+			# Pop operands
+			operands.pop()
+			# Pop operator
+			oper = operators.pop()
+			# Pop types
+			operandType = types.pop()
+			# Check semanticCube with types and operator
+			resType = semanticCube[(operandType, operandType, oper)]
+			oper = "ARR" + oper
+			if oper == "ARR!" or oper == "ARR?":
+				if arrMatOperands.size() > 1:
+					arrOperand = arrMatOperands.pop()
+					if "cols" not in arrOperand:
+						arrOperand["cols"] = 1
+					if (arrOperand["rows"] == arrOperand["cols"] and oper == "ARR?") or oper == "ARR!":
+						if resType != "error":
+							address_type = "temporal"
+							if resType == "int":
+								address_type += "Int"
+							elif resType == "float":
+								address_type += "Float"
+							else:
+								address_type += "Char"
+							temp_quad = Quadruple(oper, arrOperand, "_", addresses[address_type])
+							Quadruples.push_quad(temp_quad)
+							operands.push(addresses[address_type])
+							if oper == "ARR?":
+								arrMatOperands.push({
+									"address": addresses[address_type],
+									"rows": arrOperand["rows"],
+									"cols": arrOperand["cols"],
+									"type": "float"
+								})
+								addresses[address_type] += arrOperand["rows"] * arrOperand["cols"]
+							elif oper == "ARR!":
+								arrMatOperands.push({
+									"address": addresses[address_type],
+									"rows": arrOperand["cols"],
+									"cols": arrOperand["rows"],
+									"type": resType
+								})
+								addresses[address_type] += arrOperand["rows"] * arrOperand["cols"]
+							types.push(resType)
+						else:
+							Error.invalid_operation_in_line(t.lexer.lineno)
+					else:
+						Error.invalid_inverse_calculation(t.lexer.lineno)
+				else:
+					Error.invalid_operation_in_line(t.lexer.lineno)
+			else:
+				arrOperand = arrMatOperands.pop()
+				if arrOperand["rows"] == arrOperand["cols"]:
+					if resType != "error":
+						address_type = "temporal"
+						if resType == "int":
+							address_type += "Int"
+						elif resType == "float":
+							address_type += "Float"
+						else:
+							address_type += "Char"
+						temp_quad = Quadruple(oper, arrOperand, "_", addresses[address_type])
+						Quadruples.push_quad(temp_quad)
+						operands.push(addresses[address_type])
+						addresses[address_type] += 1
+						types.push(resType)
+					else:
+						Error.invalid_operation_in_line(t.lexer.lineno)
+				else:
+					Error.invalid_determinant_calculation(t.lexer.lineno)
 
 #evaluateHyperExp: Evalua operador y operandos de expresiones booleanas del tipo AND Y or
 def p_evaluateHyperExp(t):
@@ -775,6 +847,8 @@ def p_evaluateSuperExp(t):
 			lType = types.pop()
 			# Checar cubo semantico para tipos y operador
 			resType = semanticCube[(lType, rType, oper)]
+			if arrMatOperands.size() > 0:
+				Error.invalid_operation_in_line(t.lexer.lineno)
 			# Checar tipo de resultado y evaluar expresion si no es error
 			if resType != "error":
 				#Asignar temporal a tipo de direccion
@@ -803,9 +877,7 @@ def p_evaluateSuperExp(t):
 				Error.operation_type_mismatch(lOp, rOp, t.lexer.lineno)
 
 def p_opMatrix(t):
-	'''opMatrix : EXCLAMACION addOperator
-				| INTERROGACION addOperator
-				| SIGNO_DOLAR addOperator '''
+	'''opMatrix : addOperator'''
 
 def p_exp(t):
 	'''exp : term evaluateTerm expFunction
@@ -904,7 +976,6 @@ def p_evaluateTerm(t):
 			#Si el tipo de resultado da Error dar type mismatch.
 			else:
 				Error.operation_type_mismatch(t.lexer.lineno)
-
 
 def p_expFunction(t):
     '''expFunction : MAS addOperator exp
@@ -1033,62 +1104,6 @@ def p_removeFF(t):
 	'removeFF : '
 	operators.pop()
 
-
-#def p_addOperand(t):
-	#'addOperand : '
-	#operands.push(t[-1])
-
-#addTypeId: ***
-def p_addTypeId(t):
-	'addTypeId : '
-	# Si la variable existe en la tabla de variables
-	if arrMatId.peek() in variableTable[currentScope]:
-		#Hace push al tipo a la pila de tipos
-		types.push(variableTable[currentScope][arrMatId.peek()]["type"])
-	# Si la variable existe en la tabla de variables globales
-	elif arrMatId.peek() in variableTable["global"]:
-		#Hace pusha al tipo de la variable global a la pila de tipos
-		types.push(variableTable["global"][arrMatId.peek()]["type"])
-	#Si la variable no existe marcar error variable indefinida
-	else:
-		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
-
-#addOperandId: Mete el ID del arreglo a la pila de IDs de array y el scope a la pila de scopes.
-def p_addOperandId(t):
-	'addOperandId : '
-	# Agrega variable a la pila
-	arrMatId.push(t[-1])
-	# Agrega direccion del operando del scope a pila de operandos, si es que existe
-	if arrMatId.peek() in variableTable[currentScope]:
-		operands.push(variableTable[currentScope][arrMatId.peek()]["address"])
-		arrMatScope.push(currentScope)
-	# Agrega direccion del operando del scope global a pila de operandos, si es que existe
-	elif arrMatId.peek() in variableTable["global"]:
-		operands.push(variableTable["global"][arrMatId.peek()]["address"])
-		arrMatScope.push("global")
-	#Si no existe, marcar error variable indefinida
-	else:
-		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
-	#Si es un arreglo
-	if "rows" in variableTable[arrMatScope.peek()][t[-1]]:
-		#Si es un arreglo de una dimension (sin columnas)
-		if "cols" not in variableTable[arrMatScope.peek()][t[-1]]:
-			#Asignar arreglo a variable
-			variable = variableTable[arrMatScope.peek()][t[-1]]
-			#Meter operandos a la pila
-			arrMatOperands.push({
-				#Asignar la direccion a address
-				"address": variable["address"],
-				#Asignar la cantidad de filas a rows
-				"rows": variable["rows"],
-				#Asignar 1 a cols
-				"cols": 1
-			})
-		#Si si es arreglo de 2 dimensiones, meterlo a la pila de operandos.
-		else:
-			arrMatOperands.push(variableTable[arrMatScope.peek()][t[-1]])
-
-
 def p_read(t):
 	'read : LEE LEFTPAR id_list RIGHTPAR PUNTOYCOMA'
 
@@ -1135,16 +1150,6 @@ def p_printFunction(t):
 def p_printFunction2(t):
 	'printFunction2 : printFunction'
 
-#addPrint: Genera un cuadruplo print y le hace push a la lista de cuadruplos
-def p_addPrint(t):
-	'addPrint : '
-	#Genera cuadruplo print
-	temp_quad = Quadruple("imprime", '_', '_', operands.pop())
-	#Hace push al cuadruplo a la lista de cuadruplos
-	Quadruples.push_quad(temp_quad)
-	#Pop a la pila de tipos
-	types.pop()
-
 
 def p_print_param(t):
 	'''print_param : hyperExpression addPrint
@@ -1158,11 +1163,11 @@ def p_addPrintString(t):
 	#Si el string no esta en la tabla de variables constantes
 	if stringToPrint not in variableTable["constants"]:
 		#Saca la direccion de la variable y se la asigna a stringToPrint
-		variableTable["constants"][stringToPrint] = {"address": addresses["cChar"]}
+		variableTable["constants"][stringToPrint] = {"address": addresses["constantChar"]}
 		#Se le asigna esa direccion a address
 		address = variableTable["constants"][stringToPrint]["address"]
 		#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
-		addresses["cChar"] += 1
+		addresses["constantChar"] += 1
 	else:
 		#Se le asigna la direccion de la variable a address
 		address = variableTable["constants"][stringToPrint]["address"]
@@ -1171,29 +1176,19 @@ def p_addPrintString(t):
 	#Se hace push al cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(temp_quad)
 
-def p_checkVoidType(t):
-	'checkVoidType : '
-	global currentScope
-	#Si el tipo de la funcion es void, marcar error return en funcion void
-	if functionDir[currentScope]["type"] == "void":
-		Error.return_on_void_function(0, t.lexer.lineno)
-	#Saca tipo de la pila de tipos, es igual al tipo de la funcion
-	if types.pop() == functionDir[currentScope]["type"]:
-		#Genera cuadruplo REGRESA
-		tmp_quad = Quadruple("REGRESA", "_", "_", operands.pop())
-		#Hace push al cuadruplo a la lista de cuadruplos
-		Quadruples.push_quad(tmp_quad)
-		global returnMade
-		returnMade = True
-	#Si el tipo no es igual, marcar error type mismatch en return
-	else:
-		Error.type_mismatch_on_return(t.lexer.lineno)
-	
-def p_checkNonVoidType(t):
-	'checkNonVoidType : '
-	#Si el tipo de la funcion no es void, marcar error no hay return en funcion
-	if functionDir[currentScope]["type"] != "void":
-		Error.no_return_on_function(0, t.lexer.lineno)
+#addPrint: Genera un cuadruplo print y le hace push a la lista de cuadruplos
+def p_addPrint(t):
+	'addPrint : '
+	if arrMatOperands.size() > 0:
+		Error.invalid_print_on_array_variable(t.lexer.lineno)
+	#Genera cuadruplo print
+	temp_quad = Quadruple("imprime", '_', '_', operands.pop())
+	#Hace push al cuadruplo a la lista de cuadruplos
+	Quadruples.push_quad(temp_quad)
+	#Pop a la pila de tipos
+	types.pop()
+
+
 
 def p_module(t):
 	'module : ID checkFunctionExists generateERASize LEFTPAR moduleFunction nullParam RIGHTPAR generateGosub'
@@ -1316,6 +1311,56 @@ def p_dimArray(t):
 	arrMatId.pop()
 	arrMatScope.pop()
 
+#addOperandId: Mete el ID del arreglo a la pila de IDs de array y el scope a la pila de scopes.
+def p_addOperandId(t):
+	'addOperandId : '
+	# Agrega variable a la pila
+	arrMatId.push(t[-1])
+	# Agrega direccion del operando del scope a pila de operandos, si es que existe
+	if arrMatId.peek() in variableTable[currentScope]:
+		operands.push(variableTable[currentScope][arrMatId.peek()]["address"])
+		arrMatScope.push(currentScope)
+	# Agrega direccion del operando del scope global a pila de operandos, si es que existe
+	elif arrMatId.peek() in variableTable["global"]:
+		operands.push(variableTable["global"][arrMatId.peek()]["address"])
+		arrMatScope.push("global")
+	#Si no existe, marcar error variable indefinida
+	else:
+		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
+	#Si es un arreglo
+	if "rows" in variableTable[arrMatScope.peek()][t[-1]]:
+		#Si es un arreglo de una dimension (sin columnas)
+		if "cols" not in variableTable[arrMatScope.peek()][t[-1]]:
+			#Asignar arreglo a variable
+			variable = variableTable[arrMatScope.peek()][t[-1]]
+			#Meter operandos a la pila
+			arrMatOperands.push({
+				#Asignar la direccion a address
+				"address": variable["address"],
+				#Asignar la cantidad de filas a rows
+				"rows": variable["rows"],
+				#Asignar 1 a cols
+				"cols": 1
+			})
+		#Si si es arreglo de 2 dimensiones, meterlo a la pila de operandos.
+		else:
+			arrMatOperands.push(variableTable[arrMatScope.peek()][t[-1]])
+
+#addTypeId: ***
+def p_addTypeId(t):
+	'addTypeId : '
+	# Si la variable existe en la tabla de variables
+	if arrMatId.peek() in variableTable[currentScope]:
+		#Hace push al tipo a la pila de tipos
+		types.push(variableTable[currentScope][arrMatId.peek()]["type"])
+	# Si la variable existe en la tabla de variables globales
+	elif arrMatId.peek() in variableTable["global"]:
+		#Hace pusha al tipo de la variable global a la pila de tipos
+		types.push(variableTable["global"][arrMatId.peek()]["type"])
+	#Si la variable no existe marcar error variable indefinida
+	else:
+		Error.undefined_variable(arrMatId.peek(), t.lexer.lineno)
+
 def p_readIDType(t):
 	'readIDType : '
 	#Se saca el operando de la pila de operandos
@@ -1340,22 +1385,6 @@ def p_readIDType(t):
 		#Si la variable no tiene filas (no es arreglo), marcar error.
 		if "rows" not in variableTable["global"][arrMatId.peek()]:
 			Error.variable_not_subscriptable_as_array(arrMatId.peek(), t.lexer.lineno)
-
-def p_statement(t):
-	'''statement : return checkVoidType
-				 | if statement
-				 | comment statement
-				 | read statement
-				 | print statement
-				 | assignment statement
-				 | module PUNTOYCOMA statement
-				 | for statement
-				 | raizcuadrada statement
-				 | pow statement
-				 | exponencial statement
-				 | cuadratica statement
-				 | while statement 
-				 | checkNonVoidType'''
 
 #Genera el cuadruplo verify del indice utilizado para verificar que este dentro del rango correcto de numero de filas
 def p_verifyRows(t):
@@ -1456,6 +1485,47 @@ def p_checkMatAsArray(t):
 		#Si solo tiene columnas sin renglones, marcar error
 		if "cols" in variableTable["global"][arrMatId.peek()]:
 			Error.matrix_accessed_as_array(arrMatId.peek(), t.lexer.lineno)
+
+def p_statement(t):
+	'''statement : return checkVoidType
+				 | if statement
+				 | comment statement
+				 | read statement
+				 | print statement
+				 | assignment statement
+				 | module PUNTOYCOMA statement
+				 | for statement
+				 | raizcuadrada statement
+				 | pow statement
+				 | exponencial statement
+				 | cuadratica statement
+				 | while statement 
+				 | checkNonVoidType'''
+
+def p_checkVoidType(t):
+	'checkVoidType : '
+	global currentScope
+	#Si el tipo de la funcion es void, marcar error return en funcion void
+	if functionDir[currentScope]["type"] == "void":
+		Error.return_on_void_function(0, t.lexer.lineno)
+	#Saca tipo de la pila de tipos, es igual al tipo de la funcion
+	if types.pop() == functionDir[currentScope]["type"]:
+		#Genera cuadruplo REGRESA
+		tmp_quad = Quadruple("REGRESA", "_", "_", operands.pop())
+		#Hace push al cuadruplo a la lista de cuadruplos
+		Quadruples.push_quad(tmp_quad)
+		global returnMade
+		returnMade = True
+	#Si el tipo no es igual, marcar error type mismatch en return
+	else:
+		Error.type_mismatch_on_return(t.lexer.lineno)
+
+def p_checkNonVoidType(t):
+	'checkNonVoidType : '
+	#Si el tipo de la funcion no es void, marcar error no hay return en funcion
+	if functionDir[currentScope]["type"] != "void":
+		Error.no_return_on_function(0, t.lexer.lineno)
+
 
 def p_addRaiz(t):
 	'addRaiz : '
@@ -1628,4 +1698,4 @@ program = f.read()
 parser = yacc.yacc()
 
 parser.parse(program)
-#maquina_virtual()
+maquina_virtual()

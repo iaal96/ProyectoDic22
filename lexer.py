@@ -47,11 +47,7 @@ tokens = [
     'LEFTBRACK',
     'RIGHTBRACK',
     'LEFTBRACE',
-    'PUNTO',
     'RIGHTBRACE',
-    'EXCLAMACION',
-    'INTERROGACION',
-    'SIGNO_DOLAR',
     'CST_INT',
     'CST_FLOAT',
     'CST_STRING',
@@ -82,10 +78,6 @@ t_LEFTBRACK     = r'\['
 t_RIGHTBRACK    = r'\]'
 t_LEFTBRACE     = r'\{'
 t_RIGHTBRACE    = r'\}'
-t_EXCLAMACION   = r'!'
-t_PUNTO   = r'.'
-t_INTERROGACION      = r'\?'
-t_SIGNO_DOLAR    = r'\$'
 t_CST_INT       = r'[0-9]+'
 t_CST_FLOAT     = r'[0-9]+\.[0-9]+'
 t_CST_CHAR      = r'("(\\"|[^"])?")|(\'(\\\'|[^\'])?\')'

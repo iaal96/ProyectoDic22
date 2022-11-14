@@ -1,5 +1,5 @@
-programa arraySort;
-var int array1[5];
+programa bubbleSort;
+var int array[5];
 
 principal() {
     var int sorted, i, changed, aux;
@@ -8,16 +8,17 @@ principal() {
     changed = 0;
 
     %% assign array
-    array1[0] = 2;
-    array1[1] = 8;
-    array1[2] = 5;
-    array1[3] = 33;
-    array1[4] = 25;
+    array[0] = 2;
+    array[1] = 9;
+    array[2] = 7;
+    array[3] = 20;
+    array[4] = 15;
 
     mientras (sorted == 0) {
-        si (array1[i] > array1[i + 1]) entonces {
-            aux = array1[i];
-            array1[i] = i+changed;
+        si (array[i] > array[i + 1]) entonces {
+            aux = array[i];
+            array[i] = array[i + 1];
+            array[i + 1] = aux;
             changed = 1;
         }
         si (i == 3) entonces {
@@ -32,6 +33,6 @@ principal() {
     }
 
     para i = 0 hasta i < 5 {
-        imprime(array1[i]);
+        imprime(array[i]);
     }
 }

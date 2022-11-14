@@ -4,7 +4,7 @@ principal() {
     var int nTermino, primero, segundo, resultado, x;
     primero= 0;
     segundo= 1;
-
+    imprime("Inserta numero: ");
     lee(nTermino); 
 
     para x = 2 hasta x <= nTermino {
