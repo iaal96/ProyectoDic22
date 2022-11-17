@@ -1,25 +1,23 @@
-programa matrixmultiplication;
+programa multiplicacionMatrices;
 
 principal() {
-    var int matrix1[3][4], matrix2[4][6], result[3][6], i, j;
-
-    para j = 0 hasta j < 4 {
+    var int matriz1[3][2], matriz2[2][3], resultado[3][3], i, j;
+    matriz1[0][0] = 1;
+    matriz1[0][1] = 2;
+    matriz1[1][0] = 3;
+    matriz1[1][1] = 4;
+    matriz1[2][0] = 5;
+    matriz1[2][1] = 6;
+    matriz2[0][0] = 1;
+    matriz2[0][1] = 2;
+    matriz2[0][2] = 3;
+    matriz2[1][0] = 3;
+    matriz2[1][1] = 4;
+    matriz2[1][2] = 5;
+    resultado = matriz1 * matriz2; 
+para j = 0 hasta j < 3 {
         para i = 0 hasta i < 3 {
-            matrix1[i][j] = i + j;
-        }
-    }
-    
-    para j = 0 hasta j < 6 {
-        para i = 0 hasta i < 4 {
-            matrix2[i][j] = i + j;
-        }
-    }
-
-    result = matrix1 * matrix2;
-
-    para j = 0 hasta j < 6 {
-        para i = 0 hasta i < 3 {
-            imprime(result[i][j]);
+            imprime(resultado[i][j]);
         }
     }
 }

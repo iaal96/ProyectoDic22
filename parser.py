@@ -1499,12 +1499,12 @@ def p_checkMatAsArray(t):
 	if arrMatId.peek() in variableTable[currentScope]:
 		#Si solo tiene columnas sin renglones, marcar error
 		if "cols" in variableTable[currentScope][arrMatId.peek()]:
-			Error.matrix_accessed_as_array(arrMatId.peek(), t.lexer.lineno)
+			Error.matrix_accessed_as_array(t.lexer.lineno)
 	#Si el ID existe en la tabla de variables globales
 	elif arrMatId.peek() in variableTable["global"]:
 		#Si solo tiene columnas sin renglones, marcar error
 		if "cols" in variableTable["global"][arrMatId.peek()]:
-			Error.matrix_accessed_as_array(arrMatId.peek(), t.lexer.lineno)
+			Error.matrix_accessed_as_array(t.lexer.lineno)
 
 def p_statement(t):
 	'''statement : return checkVoidType

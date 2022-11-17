@@ -71,8 +71,8 @@ class Error:
 		exit(0) 
 
 	@staticmethod
-	def matrix_accessed_as_array(t, lineno):
-		print("Error: matriz '%s' accesada como arreglo en linea %d." % (t, t.lexer.lineno))
+	def matrix_accessed_as_array(lineno):
+		print("Error: matriz accesada como arreglo en linea %d." % (lineno))
 		exit(0)
 
 	@staticmethod
@@ -129,9 +129,9 @@ class Error:
 	def array_size_must_be_positive(t, lineno):
 		print("Error: tamaño del arreglo '%s' en la linea  %d debe ser positivo." % (t, lineno))
 		exit(0)
-	
+
 	def index_out_of_bounds():
-		print("Error: index out of bounds.")
+		print("Error: indice fuera del rango." )
 		exit(0)
 
 	@staticmethod
@@ -140,18 +140,8 @@ class Error:
 		exit(0)
 
 	@staticmethod
-	def invalid_inverse_calculation(lineno):
-		print("Error: dimensiones de arreglo invalidas para el calculo de inversa en la linea %d." % (lineno))
-		exit(0)
-
-	@staticmethod
 	def type_mismatch_array_assignment(lineno):
 		print("Error: type mismatch en asignacion de arreglo en la linea %d." % (lineno))
-		exit(0)
-
-	@staticmethod
-	def inverse_determinant_zero():
-		print("Error: deteminante de la inversa es cero.")
 		exit(0)
 
 	@staticmethod

@@ -4,7 +4,7 @@ from EstructurasDatos import variableTable
 from errores import *
 import re
 import math
-#import numpy as np
+import numpy as np
 
 #Mapa de memoria de constantes
 cstMemMap = {}
@@ -192,7 +192,7 @@ def executeInstruction(quad):
     elif quad.operator == "REGRESA":
         return regresa(quad)
     #Si el operador del cuadruplo es VERIFICA, ejecuta la instruccion verifica
-    elif quad.operator == "VERIFY":
+    elif quad.operator == "VERIFICA":
         return verifica(quad)
     #Si el operador del cuadruplo es ARR=, ejecuta la instruccion verifica arrayAssign
     elif quad.operator == "ARR=":
