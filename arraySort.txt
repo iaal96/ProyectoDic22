@@ -2,37 +2,29 @@ programa bubbleSort;
 var int array[5];
 
 principal() {
-    var int sorted, i, changed, aux;
-    sorted = 0;
+    var int i, x, aux ;
+    x = 0;
     i = 0;
-    changed = 0;
+    aux = 0;
 
     %% assign array
-    array[0] = 2;
+    array[0] = 5;
     array[1] = 9;
-    array[2] = 7;
-    array[3] = 20;
-    array[4] = 15;
+    array[2] = 14;
+    array[3] = 8;
+    array[4] = 0;
 
-    mientras (sorted == 0) {
-        si (array[i] > array[i + 1]) entonces {
-            aux = array[i];
-            array[i] = array[i + 1];
-            array[i + 1] = aux;
-            changed = 1;
-        }
-        si (i == 3) entonces {
-            si (changed == 1) entonces {
-                i = 0;
-                changed = 0;
-            } sino {
-                sorted = 1;
+    para i = 0 hasta i <= 4 {
+        para x = 0 hasta x <= 3 {
+            si (array[i] < array[x]) entonces {
+                aux = array[i];
+                array[i] = array[x];
+                array[x] = aux;
             }
-        }
-        i = i + 1;
+        } 
     }
 
-    para i = 0 hasta i < 5 {
+    para i = 0 hasta i <= 4 {
         imprime(array[i]);
     }
 }

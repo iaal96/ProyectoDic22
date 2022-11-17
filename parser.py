@@ -31,7 +31,7 @@ def p_program(t):
 	print("Lista de tipos: ")
 	types.print()
 	#Imprimir cuadruplos'''
-	Quadruples.print_all()
+	#Quadruples.print_all()
 	#Imprimir tabla de variables
 	'''variableTable.clear()'''
 

@@ -1,11 +1,11 @@
 programa busquedaArreglo;
-var int array[6];
+var int arreglo[6];
 funcion int find(int i, int j) {
     si (j < 0) entonces {
         regresa(0-1);
     }
 
-    si (array[j] == i) entonces {
+    si (arreglo[j] == i) entonces {
         regresa(j);
     }
 
@@ -13,22 +13,21 @@ funcion int find(int i, int j) {
 }
 
 principal() {
-    var int result,x;
+    var int resultado,x;
     
-    %% asignar arreglo
-    array[0] = 4;
-    array[1] = 9;
-    array[2] = 10;
-    array[3] = 3;
-    array[4] = 8;
-    array[5] = 6;
+    arreglo[0] = 4;
+    arreglo[1] = 9;
+    arreglo[2] = 10;
+    arreglo[3] = 3;
+    arreglo[4] = 8;
+    arreglo[5] = 6;
     imprime("Teclea el valor a buscar: ");
     lee(x);
-    result = find(x, 5);
-    si(result < 0) entonces{
-        imprime("Valor no encontrado en el arreglo");
+    resultado = find(x, 5);
+    si(resultado < 0) entonces{
+        imprime("Valor no encontrado");
     }
     sino{
-        imprime(result);
+        imprime(resultado);
         }
 }

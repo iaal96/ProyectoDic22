@@ -4,7 +4,7 @@ from EstructurasDatos import variableTable
 from errores import *
 import re
 import math
-#import numpy as np
+import numpy as np
 
 cstMemMap = {}
 
