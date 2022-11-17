@@ -112,7 +112,7 @@ def t_newline(t):
     t.lexer.lineno += t.value.count("\n")
 
 def t_error(t):
-    print("Illegal character '%s' in line %d" % (t.value[0], t.lexer.lineno))
+    print("Caracter ilegal '%s' en la linea %d" % (t.value[0], t.lexer.lineno))
     t.lexer.skip(1)
     exit(0)
 

@@ -12,7 +12,6 @@ arrMatScope = Stack()
 
 def p_program(t):
 	'program : PROGRAMA ID globalTable PUNTOYCOMA declaration programFunc main'
-	#print("Compilacion exitosa")
 	#Mostrar variable table y directorio de funciones
 	'''print()
 	for i in functionDir:
@@ -1232,7 +1231,6 @@ def p_checkFunctionExists(t):
 #generateERASize: Crea el cuadruplo ERA con el directorio de la funcion que sera llamada.
 def p_generateERASize(t):
 	'generateERASize : '
-	#Generar tamano ERA pendiente...
 	global funcName
 	#Generar cuadruplo ERA con su direccion
 	tmp_quad = Quadruple("ERA", variableTable["global"][funcName]["address"], "_", "_")

@@ -6,11 +6,16 @@ import re
 import math
 #import numpy as np
 
+#Mapa de memoria de constantes
 cstMemMap = {}
 
+#Inicializa una memoria global
 globalMem = Memory()
+#Inicializa una memoria local
 localMem = Memory()
+#Inicializa una memoria temporal
 tempMem = Memory()
+
 
 localMemStack = []
 functionReturnStack = []
