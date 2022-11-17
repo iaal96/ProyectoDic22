@@ -1,8 +1,18 @@
 programa matematicas;
 
 principal() {
-    var int x, a, b, c, y, m;
     imprime(raizcuadrada(pow(raizcuadrada(16),3)));
-    imprime(exponencial(2));
+    imprime(exponencial(residuo(5,2)));
+    imprime(redondear.arriba(raizcuadrada(5)));
+    imprime(redondear.abajo(grados(4.50)));
+    imprime(gamma(pow(2,5)));
+    imprime(residuo(224,125));
+    imprime(radianes(100.03));
+    imprime(grados(8.90));
+    imprime(seno(coseno(3.141528)));
+    imprime(coseno(tangente(90)));
+    imprime(tangente(90));
+    imprime(logaritmo(raizcuadrada(pow(5,2))));
+    imprime(logaritmo.gamma(7));
     cuadratica(2,9,10);
 }

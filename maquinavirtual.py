@@ -4,7 +4,7 @@ from EstructurasDatos import variableTable
 from errores import *
 import re
 import math
-import numpy as np
+#import numpy as np
 
 cstMemMap = {}
 
@@ -126,6 +126,39 @@ def executeInstruction(quad):
     #Si el operador del cuadruplo es exponencial, ejecuta la instruccion exponencial
     elif quad.operator == "exponencial":
         return exponencial(quad)
+    #Si el operador del cuadruplo es redondearArriba, ejecuta la instruccion redondearArriba
+    elif quad.operator == "redondearArriba":
+        return redondearArriba(quad)
+    #Si el operador del cuadruplo es redondearAbajo, ejecuta la instruccion redondearAbajo
+    elif quad.operator == "redondearAbajo":
+        return redondearAbajo(quad)
+    #Si el operador del cuadruplo es gamma, ejecuta la instruccion gamma
+    elif quad.operator == "gamma":
+        return gamma(quad)
+    #Si el operador del cuadruplo es residuo, ejecuta la instruccion residuo
+    elif quad.operator == "residuo":
+        return residuo(quad)
+    #Si el operador del cuadruplo es radianes, ejecuta la instruccion radianes
+    elif quad.operator == "radianes":
+        return radianes(quad)
+    #Si el operador del cuadruplo es grados, ejecuta la instruccion grados
+    elif quad.operator == "grados":
+        return grados(quad)
+    #Si el operador del cuadruplo es logaritmo, ejecuta la instruccion logaritmo
+    elif quad.operator == "logaritmo":
+        return logaritmo(quad)
+    #Si el operador del cuadruplo es logaritmoGamma, ejecuta la instruccion logaritmoGamma
+    elif quad.operator == "logaritmoGamma":
+        return logaritmoGamma(quad)
+    #Si el operador del cuadruplo es seno, ejecuta la instruccion seno
+    elif quad.operator == "seno":
+        return seno(quad)
+    #Si el operador del cuadruplo es coseno, ejecuta la instruccion coseno
+    elif quad.operator == "coseno":
+        return coseno(quad)
+    #Si el operador del cuadruplo es tangente, ejecuta la instruccion tangente
+    elif quad.operator == "tangente":
+        return tangente(quad)
     #Si el operador del cuadruplo es lee, ejecuta la instruccion leer
     elif quad.operator == "lee":
         return leer(quad)
@@ -643,6 +676,227 @@ def raizcuadrada(quad):
     if res_address == 8:
         tempMem.insertChar(result, quad.result)
 
+def gamma(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.gamma(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def logaritmo(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.log(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def logaritmoGamma(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.lgamma(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def grados(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.degrees(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def radianes(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.radians(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def seno(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.sin(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def coseno(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.cos(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def tangente(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.tan(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+
+def redondearArriba(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.ceil(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def redondearAbajo(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = math.floor(lOp)
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
 def pow(quad):
     #Se divide la direccion entre 1000
     res_address = quad.result // 1000
@@ -662,6 +916,36 @@ def pow(quad):
         rOp = getValueFromAddress(quad.right_operand)
 
     result = math.pow(lOp,rOp)
+
+    #Si es int se inserta int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si es float se inserta float en memoria temporal
+    if res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    #Si es char se inserta char en memoria temporal
+    if res_address == 8:
+        tempMem.insertChar(result, quad.result)
+
+def residuo(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    #Si operando derecho tiene otra direccion
+    else:
+        #Saca el valor del operando derecho
+        rOp = getValueFromAddress(quad.right_operand)
+
+    result = math.remainder(lOp,rOp)
 
     #Si es int se inserta int en memoria temporal
     if res_address == 6:

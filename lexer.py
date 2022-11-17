@@ -22,7 +22,18 @@ reserved = {
     'raizcuadrada': 'RAIZCUADRADA',
     'cuadratica':'CUADRATICA',
     'pow':'POW',
-    'exponencial':'EXPONENCIAL'
+    'exponencial':'EXPONENCIAL',
+    'redondear':'REDONDEAR',
+    'arriba':'ARRIBA',
+    'abajo':'ABAJO',
+    'gamma':'GAMMA',
+    'residuo':'RESIDUO',
+    'radianes':'RADIANES',
+    'grados':'GRADOS',
+    'seno':'SENO',
+    'coseno':'COSENO',
+    'tangente':'TANGENTE',
+    'logaritmo':'LOGARITMO',
 }
 
 tokens = [
@@ -44,6 +55,7 @@ tokens = [
     'COMA',
     'PUNTOYCOMA',
     'ID',
+    'PUNTO',
     'LEFTBRACK',
     'RIGHTBRACK',
     'LEFTBRACE',
@@ -74,6 +86,7 @@ t_RIGHTPAR      = r'\)'
 t_IGUAL         = r'='
 t_COMA          = r','
 t_PUNTOYCOMA     = r';'
+t_PUNTO          = r'.'
 t_LEFTBRACK     = r'\['
 t_RIGHTBRACK    = r'\]'
 t_LEFTBRACE     = r'\{'
@@ -82,7 +95,7 @@ t_CST_INT       = r'[0-9]+'
 t_CST_FLOAT     = r'[0-9]+\.[0-9]+'
 t_CST_CHAR      = r'("(\\"|[^"])?")|(\'(\\\'|[^\'])?\')'
 t_CST_STRING    = r'("(\\"|[^"])*")|(\'(\\\'|[^\'])*\')'
-t_COMMENT_TEXT  = r'%%.*\n'
+t_COMMENT_TEXT  = r'//.*\n'
 
 #Ignorados
 t_ignore = " \t\r"
