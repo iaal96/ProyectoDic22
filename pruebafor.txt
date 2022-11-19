@@ -1,0 +1,10 @@
+programa pruebafor;
+
+principal(){
+    var int c;
+    c = 0;
+    mientras (c<10){
+        imprime(c);
+        c = c+1;
+    }
+}

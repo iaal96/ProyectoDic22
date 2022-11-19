@@ -37,6 +37,12 @@ class Error:
 		exit(0)
 
 	@staticmethod
+	def redefinition_of_function(t, lineno):
+		" error de redefinicion de funcion "
+		print("Error: redefinicion de funcion '%s' en la linea %d." % (t, lineno))
+		exit(0)
+
+	@staticmethod
 	def variable_has_no_assigned_value(t, lineno):
 		" error de variable sin valor asignado "
 		print("Error: variable '%s' en la linea %d no tiene un valor asignado." %(t, lineno))

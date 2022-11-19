@@ -3,6 +3,7 @@ programa factorialCic;
 principal() {
     var int c, resultado, num;
     resultado = 1;
+    imprime("Teclea un numero: ");
     lee(num);
     para c = 1 hasta c <= num {
         resultado = resultado * c;

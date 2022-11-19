@@ -1,8 +1,8 @@
 programa arraySort;
-var int arreglo[5];
+var int arreglo[6];
 
 principal() {
-    var int i, x, aux ;
+    var int i, x, aux, y ;
     x = 0;
     i = 0;
     aux = 0;
@@ -12,10 +12,13 @@ principal() {
     arreglo[1] = 9;
     arreglo[2] = 14;
     arreglo[3] = 8;
-    arreglo[4] = 0;
+    imprime("Teclea valor de arreglo 4: ");
+    lee(y);
+    arreglo[4] = y;
+    arreglo[5] = 20;
 
-    para i = 0 hasta i <= 4 {
-        para x = 0 hasta x <= 3 {
+    para i = 0 hasta i <= 5 {
+        para x = 0 hasta x <= 4 {
             si (arreglo[i] < arreglo[x]) entonces {
                 aux = arreglo[i];
                 arreglo[i] = arreglo[x];
@@ -24,7 +27,8 @@ principal() {
         } 
     }
 
-    para i = 0 hasta i <= 4 {
+    imprime("Resultado de sort: "); 
+    para i = 0 hasta i <= 5 {
         imprime(arreglo[i]);
     }
 }

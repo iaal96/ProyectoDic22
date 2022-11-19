@@ -664,7 +664,7 @@ def p_addFuncToDir(t):
 	'addFuncToDir : '
 	# Si la funcion existe en global scope, dar error redefinicion de variable.
 	if t[-1] in variableTable["global"]:
-		Error.redefinition_of_variable(t[-1], t.lexer.lineno)
+		Error.redefinition_of_function(t[-1], t.lexer.lineno)
 	else:
 		#Si no existe
 		global currentScope
@@ -884,7 +884,7 @@ def p_evaluateSuperExp(t):
 				types.push(resType)
 			#Dar error type mismatch en operacion
 			else:
-				Error.operation_type_mismatch(lOp, rOp, t.lexer.lineno)
+				Error.operation_type_mismatch(t.lexer.lineno)
 
 def p_opMatrix(t):
 	'''opMatrix : addOperator'''

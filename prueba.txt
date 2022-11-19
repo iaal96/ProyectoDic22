@@ -1,0 +1,22 @@
+programa prueba;
+
+principal(){
+    var int x,y,c;
+    imprime("Introduce valor 1: ");
+    lee(x);
+    imprime("Introduce valor 2: ");
+    lee(y);
+    c = x+y;
+    si (c >= "a") entonces
+    {
+        si(c >= 25) entonces{
+            imprime("Tu edad es ", c ,"eres un adulto");
+        }
+        sino{
+            imprime("Tu edad es ", c ,"eres mayor de edad");
+        }
+    }
+    sino{
+        imprime("Tu edad es ", c ,"eres menor de edad");
+    }
+}
