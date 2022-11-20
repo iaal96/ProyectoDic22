@@ -530,7 +530,7 @@ def p_setCols(t):
 
 #function: Crea cuadruplo ENDFUNC y define tabla de variables locales.
 def p_function(t):
-	'function : functionType ID addFuncToDir LEFTPAR param RIGHTPAR setParamLength LEFTBRACE declaration statement RIGHTBRACE'
+	'function : functionType ID addFuncToDir LEFTPAR param  RIGHTPAR setParamLength LEFTBRACE declaration statement RIGHTBRACE '
     #Resetear scope a global cuando se salga del scope de la funcion, eliminar varTable y referenciar en functionDir
 	global currentScope
 	# Crear cuadruplo endfuc para terminar funcion
