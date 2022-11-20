@@ -4,7 +4,8 @@ from EstructurasDatos import variableTable
 from errores import *
 import re
 import math
-import numpy as np
+
+#import numpy as np
 
 #Mapa de memoria de constantes
 cstMemMap = {}
@@ -1141,8 +1142,10 @@ def verifica(quad):
         verifica = getValueFromAddress(getValueFromAddress(quad.left_operand))
     else:
         verifica = getValueFromAddress(quad.left_operand)
+    #Si operando izquierdo es mayor a resultado menos operando derecho dar error indice furea de rango
     if verifica > quad.result - quad.right_operand:
-        Error.index_out_of_bounds()
+        print("Error: Indice", verifica, "en arreglo está fuera de rango.")
+        exit(0)
     if arrType == 3:
         localMem.adjustIntArrSize(quad.result)
     elif arrType == 4:

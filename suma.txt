@@ -1,0 +1,14 @@
+programa suma;
+
+funcion int sumar(int x, int y){
+    var int resultado;
+    resultado = x + y;
+    regresa(resultado);
+}
+
+principal() {
+    var int x, y;
+    lee(x);
+    lee(y);
+    imprime(sumar());
+}

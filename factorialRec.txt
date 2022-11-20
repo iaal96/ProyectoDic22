@@ -11,6 +11,5 @@ principal() {
     var int x, y;
     imprime("Teclea un numero: ");
     lee(x);
-    x = factorial(x);
-    imprime(x);
+    imprime(factorial(x));
 }

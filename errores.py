@@ -136,8 +136,8 @@ class Error:
 		print("Error: tamaño del arreglo '%s' en la linea  %d debe ser positivo." % (t, lineno))
 		exit(0)
 
-	def index_out_of_bounds():
-		print("Error: indice fuera del rango." )
+	def index_out_of_bounds(lineno):
+		print("Error: indice fuera del rango en la linea %d." % (lineno))
 		exit(0)
 
 	@staticmethod
