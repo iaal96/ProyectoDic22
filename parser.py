@@ -99,14 +99,14 @@ def p_assignment(t):
 				  | ID dimArray IGUAL redondearArriba
 				  | ID dimArray IGUAL redondearAbajo
 				  | ID dimArray IGUAL gamma'''
-	# Si se tiene mas de 1 arrMatOperand
+	# Si se tiene mas de 1 arreglo
 	if arrMatOperands.size() > 1:
 		#Sacar tipo
 		types.pop()
 		#Sacar operandos de pila operandos
 		operands.pop()
 		operands.pop()
-		#Sacar operandos de pila de operandos de arreglos
+		#Sacar arreglos
 		assign = arrMatOperands.pop()
 		address = arrMatOperands.pop()
 		#Si no tiene el mismo tipo que la direccion, dar error type mismatch  
@@ -119,7 +119,7 @@ def p_assignment(t):
 		temp_quad = Quadruple("ARR=", assign, "_", address)
 		#Hacer push al cuadruplo a la lista de cuadruplos
 		Quadruples.push_quad(temp_quad)
-	#Si hay 1 arrMatOperand marcar error
+	#Si solo hay 1 arreglo y quieres hacer asignacion con  una variable que no es arreglo,
 	elif arrMatOperands.size() == 1:
 		Error.invalid_assignment_to_array_variable(t.lexer.lineno-1)
 		#Si id esta en el varTable del scope
@@ -130,7 +130,7 @@ def p_assignment(t):
 			if "rows" in variableTable[currentScope][t[1]]:
 				#Sacar tipo de la pila de tipos
 				types.pop()
-				#Sacar operandos de la pila de operandos
+				#Sacar las direcciones de la pila
 				assign = operands.pop()
 				address = operands.pop()
 				#Generar cuadruplo
@@ -186,7 +186,7 @@ def p_declaration(t):
 	'''declaration : VAR declarationPrim
 				   | '''
 	#Asignar cuadruplo start para funcion
-	functionDir[currentScope]["start"] = Quadruples.next_id
+	#functionDir[currentScope]["start"] = Quadruples.next_id
 
 #primitive=Primitive Data Types
 def p_declarationPrim(t):
@@ -295,7 +295,7 @@ def p_createQuadFor(t):
 #updateQuadFor: Actualizar cuadruplo GOTOF con el id del cuadruplo al cual debe "saltar"
 def p_updateQuadFor(t):
 	'updateQuadFor : '
-	#Actualizar cuadruplo GOTOF cuando termine el for
+	#Pop a la pila de saltos
 	tmp_end = Quadruples.jump_stack.pop()
 	tmp_rtn = Quadruples.jump_stack.pop()
 	#Generar cuadruplo
@@ -315,7 +315,7 @@ def p_forAssignment(t):
 	cstAddress = 0
 	#Si la variable no esta en tabla de constantes
 	if t[3] not in variableTable["constants"]:
-		#Se le asigna la direccion a la variable
+		#Se mete a tabla de constantes
 		variableTable["constants"][t[3]] = {"address": addresses[address_type], "type": "int"}
 		#Se le asigna a cstAddress la direccion dependiendo del tipo que sea la variable
 		cstAddress = addresses[address_type]
@@ -986,6 +986,8 @@ def p_evaluateTerm(t):
 			#Si el tipo de resultado da Error dar type mismatch.
 			else:
 				Error.operation_type_mismatch(t.lexer.lineno)
+			
+			#arrMatOperands.print()
 
 def p_expFunction(t):
     '''expFunction : MAS addOperator exp

@@ -7,7 +7,7 @@ principal(){
     imprime("Introduce valor 2: ");
     lee(y);
     c = x+y;
-    si (c >= "a") entonces
+    si (c >= 18) entonces
     {
         si(c >= 25) entonces{
             imprime("Tu edad es ", c ,"eres un adulto");

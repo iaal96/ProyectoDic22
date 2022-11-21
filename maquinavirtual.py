@@ -70,7 +70,7 @@ def maquina_virtual():
                 cstMemMap[variableTable["constants"][cst]["address"]] = float(cst)
         else:
             cstMemMap[variableTable["constants"][cst]["address"]] = cst
-    #Leer cuadruplos, una vez que index sea mayor que la lista de cuadruplos debe parar.
+    #Recibe cuadruplos
     index = 0
     while len(Quadruples.quadruples) > index:    
         quad = Quadruples.quadruples[index]
