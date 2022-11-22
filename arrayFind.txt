@@ -20,7 +20,7 @@ principal() {
     arreglo[2] = 10;
     arreglo[3] = 3;
     arreglo[4] = 8;
-    arreglo[8] = 6;
+    arreglo[5] = 6;
     imprime("Teclea el valor a buscar: ");
     lee(x);
     resultado = find(x, 5);

@@ -313,9 +313,7 @@ def p_forAssignment(t):
 	#Se le asigna constant int al tipo de direccion
 	address_type = "constantInt"
 	cstAddress = 0
-	#Si la variable no esta en tabla de constantes
 	if t[3] not in variableTable["constants"]:
-		#Se mete a tabla de constantes
 		variableTable["constants"][t[3]] = {"address": addresses[address_type], "type": "int"}
 		#Se le asigna a cstAddress la direccion dependiendo del tipo que sea la variable
 		cstAddress = addresses[address_type]
@@ -363,8 +361,6 @@ def p_startLoop(t):
 	result_type = types.pop()
 	#Checar tipo y valor de expresion y agregar cuadruplo al stack
 	if result_type == "int":
-		#Si es BOOLEANO
-		#if operands.peek() == 1 or operands.peek() == 0:
 			#Pop a pila de operandos y asignar a res
 			res = operands.pop()
 			#Generar Operador GOTOF
@@ -446,7 +442,7 @@ def p_varsMatrix(t):
 				  | '''
 
 
-#Guarda la direccion base de una variable de arreglo en las constantes de la tabla de variables
+#Guarda la direccion base de una variable tipo arreglo en las constantes de la tabla de variables
 def p_varsArray(t):
 	'''varsArray : LEFTBRACK CST_INT addTypeInt RIGHTBRACK setRows varsMatrix 
 				 | '''
@@ -705,82 +701,10 @@ def p_addFuncToDir(t):
 
 def p_hyperExpression(t):
     '''hyperExpression : superExpression evaluateHyperExp opHyperExpression
-                       | superExpression opMatrix evaluateOpMatrix
+                       | superExpression opMatrix 
                        | superExpression evaluateHyperExp'''
 
-def p_evaluateOpMatrix(t):
-	'evaluateOpMatrix : '
-	if operators.size() != 0:
-		if operators.peek() == "!" or operators.peek() == "?" or operators.peek() == "$":
-			# Pop operands
-			operands.pop()
-			# Pop operator
-			oper = operators.pop()
-			# Pop types
-			operandType = types.pop()
-			# Check semanticCube with types and operator
-			resType = semanticCube[(operandType, operandType, oper)]
-			oper = "ARR" + oper
-			if oper == "ARR!" or oper == "ARR?":
-				if arrMatOperands.size() > 1:
-					arrOperand = arrMatOperands.pop()
-					if "cols" not in arrOperand:
-						arrOperand["cols"] = 1
-					if (arrOperand["rows"] == arrOperand["cols"] and oper == "ARR?") or oper == "ARR!":
-						if resType != "error":
-							address_type = "temporal"
-							if resType == "int":
-								address_type += "Int"
-							elif resType == "float":
-								address_type += "Float"
-							else:
-								address_type += "Char"
-							temp_quad = Quadruple(oper, arrOperand, "_", addresses[address_type])
-							Quadruples.push_quad(temp_quad)
-							operands.push(addresses[address_type])
-							if oper == "ARR?":
-								arrMatOperands.push({
-									"address": addresses[address_type],
-									"rows": arrOperand["rows"],
-									"cols": arrOperand["cols"],
-									"type": "float"
-								})
-								addresses[address_type] += arrOperand["rows"] * arrOperand["cols"]
-							elif oper == "ARR!":
-								arrMatOperands.push({
-									"address": addresses[address_type],
-									"rows": arrOperand["cols"],
-									"cols": arrOperand["rows"],
-									"type": resType
-								})
-								addresses[address_type] += arrOperand["rows"] * arrOperand["cols"]
-							types.push(resType)
-						else:
-							Error.invalid_operation_in_line(t.lexer.lineno)
-					else:
-						Error.invalid_inverse_calculation(t.lexer.lineno)
-				else:
-					Error.invalid_operation_in_line(t.lexer.lineno)
-			else:
-				arrOperand = arrMatOperands.pop()
-				if arrOperand["rows"] == arrOperand["cols"]:
-					if resType != "error":
-						address_type = "temporal"
-						if resType == "int":
-							address_type += "Int"
-						elif resType == "float":
-							address_type += "Float"
-						else:
-							address_type += "Char"
-						temp_quad = Quadruple(oper, arrOperand, "_", addresses[address_type])
-						Quadruples.push_quad(temp_quad)
-						operands.push(addresses[address_type])
-						addresses[address_type] += 1
-						types.push(resType)
-					else:
-						Error.invalid_operation_in_line(t.lexer.lineno)
-				else:
-					Error.invalid_determinant_calculation(t.lexer.lineno)
+
 
 #evaluateHyperExp: Evalua operador y operandos de expresiones booleanas del tipo AND Y or
 def p_evaluateHyperExp(t):
@@ -1251,7 +1175,7 @@ def p_nullParam(t):
 	if paramNum < len(functionDir[funcName]["params"].values()):
 		Error.unexpected_number_of_arguments(funcName, t.lexer.lineno)
 
-#generateGosub: Crea el cuadruplo Gosub con la direccion de la funcion a llamar **
+#generateGosub: Crea el cuadruplo Gosub 
 def p_generateGosub(t):
 	'generateGosub : '
 	global funcName
@@ -1259,7 +1183,6 @@ def p_generateGosub(t):
 	tmp_quad = Quadruple("GOSUB", variableTable["global"][funcName]["address"], "_", functionDir[funcName]["start"])
 	#Hacer push del cuadruplo a la lista de cuadruplos
 	Quadruples.push_quad(tmp_quad)
-	#PARCHE GUADALUPANO
 	#Si el tipo de la funcion no es void
 	if functionDir[funcName]["type"] != "void":
 		#Si es entero
@@ -1280,6 +1203,7 @@ def p_generateGosub(t):
 			tmpAddress = addresses["temporalChar"]
 			#Se le suma 1 para darselo a la siguiente variable de ese tipo que este dentro del scope
 			addresses["temporalChar"] += 1
+	#PARCHE GUADALUPANO
 		#Genera cuadruplo con la direccion de la funcion y tmpAddress
 		tmp_quad = Quadruple("=", variableTable["global"][funcName]["address"], "_", tmpAddress)
 		#Se le hace push al cuadruplo a la lista de cuadruplos
