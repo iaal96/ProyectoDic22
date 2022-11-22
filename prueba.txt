@@ -1,22 +1,26 @@
-programa prueba;
+programa videoDemo;
 
-principal(){
-    var int x,y,c;
-    imprime("Introduce valor 1: ");
+funcion float promedio (float x, float y, float z){
+    var float resultado;
+    resultado = (x+y+z) / 3;
+    regresa(resultado);
+}
+
+principal() {
+    var float x,y,z;
+        int promedio;
+    imprime("Teclea calificacion 1");
     lee(x);
-    imprime("Introduce valor 2: ");
+    imprime("Teclea calificacion 2");
     lee(y);
-    c = x+y;
-    si (c >= 18) entonces
-    {
-        si(c >= 25) entonces{
-            imprime("Tu edad es ", c ,"eres un adulto");
-        }
-        sino{
-            imprime("Tu edad es ", c ,"eres mayor de edad");
-        }
-    }
-    sino{
-        imprime("Tu edad es ", c ,"eres menor de edad");
+    imprime("Teclea calificacion 3");
+    lee(z);
+    promedio = redondear.arriba(promedio(x,y,z));
+    imprime("El promedio es");
+    imprime(promedio);
+    si(promedio >= 70) entonces{
+        imprime("APROBADO");
+    } sino {
+        imprime("REPROBADO");
     }
 }

@@ -1,9 +1,0 @@
-programa pruebafor;
-
-principal(){
-    var int c;
-    c = 0;
-    para c = 1 hasta c < 10 {
-        imprime(c);
-    }
-}

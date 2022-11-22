@@ -1,0 +1,13 @@
+programa pruebaArreglos;
+principal(){
+    var int arreglo1[2][2], arreglo2[2][2], resultado[2][2], i, j;
+
+    para j = 0 hasta j < 2 {
+        para i = 0 hasta i < 2 {
+            imprime("Teclea el valor de arreglo1");
+            imprime("i");
+        }
+    }
+
+
+}

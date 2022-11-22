@@ -4,8 +4,7 @@ from EstructurasDatos import variableTable
 from errores import *
 import re
 import math
-
-#import numpy as np
+import numpy as np
 
 #Mapa de memoria de constantes
 cstMemMap = {}
@@ -351,13 +350,13 @@ def asignar(quad):
             tempMem.insertFloat(cstMemMap[quad.left_operand], quad.result)
         #Si la direccion es 7000-7999, sacar float de memoria temporal e insertar en memoria temporal.
         elif lOp == 7:
-            tempMem.insertFloat(tempMem.getInt(quad.left_operand), quad.result)
+            tempMem.insertFloat(tempMem.getFloat(quad.left_operand), quad.result)
         #Si la direccion es 4000-4999, sacar float de memoria local e insertar en memoria temporal.
         elif lOp == 4:
-            tempMem.insertFloat(localMem.getInt(quad.left_operand), quad.result)
+            tempMem.insertFloat(localMem.getFloat(quad.left_operand), quad.result)
         #Si la direccion es 1000-1999, sacar float de memoria global e insertar en memoria temporal.
         elif lOp == 1:
-            tempMem.insertFloat(globalMem.getInt(quad.left_operand), quad.result)
+            tempMem.insertFloat(globalMem.getFloat(quad.left_operand), quad.result)
 
     #Si es CHAR temporal
     if add_type == 8:
