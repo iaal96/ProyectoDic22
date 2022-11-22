@@ -97,7 +97,7 @@ t_CST_CHAR      = r'("(\\"|[^"])?")|(\'(\\\'|[^\'])?\')'
 t_CST_STRING    = r'("(\\"|[^"])*")|(\'(\\\'|[^\'])*\')'
 t_COMMENT_TEXT  = r'//.*\n'
 
-#Ignorados
+
 t_ignore = " \t\r"
 
 #ID

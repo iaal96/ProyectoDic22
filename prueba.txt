@@ -16,7 +16,7 @@ principal() {
     imprime("Teclea calificacion 3");
     lee(z);
     promedio = redondear.arriba(promedio(x,y,z));
-    imprime("El promedio es");
+    imprime("El promedio es ");
     imprime(promedio);
     si(promedio >= 70) entonces{
         imprime("APROBADO");

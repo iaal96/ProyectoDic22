@@ -1114,6 +1114,7 @@ def param(quad):
     if address == 5:
         newMem.insertChar(lOp, quad.result)    
 
+#Return
 def regresa(quad):
     address = quad.result // 1000
     rtn_address = Quadruples.quadruples[functionReturnStack[len(functionReturnStack) - 1]].result

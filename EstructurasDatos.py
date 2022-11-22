@@ -101,7 +101,7 @@ for i in ty:
                     semanticCube[(ty[i], ty[j], k)] = "float"
 
 
-# functionDir visual example
+# ejemplo directorio de funciones
 '''
     "global": {
         "type": "void",
@@ -130,9 +130,8 @@ for i in ty:
     }
 '''
 
-# semanticCube explanation
+#cubo semantico
 '''
-    keys are tuples => (operand1, operand2, operator)
     semanticCube[(op1, op2, op)] => int/float/char/error
     semanticCube[("int", "int", "+")] => "int"
     semanticCube[("char", "float", "*")] => "error"

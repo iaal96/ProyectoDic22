@@ -22,7 +22,7 @@ class Quadruple(object):
 		self.left_operand = left_operand
 		self.right_operand = right_operand
 		self.result = result
-
+	#Imprimir cuadruplo
 	def print(self):
 		print("Q"+ str(self.id), self.operator, self.left_operand, self.right_operand, self.result)
 
@@ -62,7 +62,7 @@ class Quadruples(object):
 		
 		Hace pop de la lista de cuadruplos
 		
-		Returns:
+		Regresa:
 			Quadruple -- Quadruple
 		"""
 		cls.next_id = len(cls.quadruples) - 1
@@ -74,7 +74,7 @@ class Quadruples(object):
 		
 		Agrega jump quadruple id (jump_id) a quadruple
 		
-		Arguments:
+		Argumentos:
 			quad_id {int} -- quadruple id
 			jump_int {int} -- int
 		"""
@@ -87,7 +87,7 @@ class Quadruples(object):
 		
 		Hace push al id del siguiente cuadruplo disponible y hace push al jump stack
 		
-		Arguments:
+		Argumentos:
 			offset {int} -- number
 		"""
 		cls.jump_stack.push(cls.next_id + offset)
@@ -98,7 +98,7 @@ class Quadruples(object):
 		
 		Hace pop al id del cuadruplo del jump stack
 		
-		Returns:
+		Regresa:
 			int -- number
 		"""
 		return cls.jump_stack.pop()
@@ -107,9 +107,9 @@ class Quadruples(object):
 	def peek_jump(cls):
 		"""Peek jump
 		
-		Peeks the id of jump quadruple
+		Hace peek al id del cuadruplo de salto
 		
-		Returns:
+		Regresa:
 			int -- number
 		"""
 		return cls.jump_stack.peek()

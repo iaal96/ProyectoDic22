@@ -1,5 +1,7 @@
 programa busquedaArreglo;
+
 var int arreglo[6];
+
 funcion int find(int i, int j) {
     si (j < 0) entonces {
         regresa(0-1);
