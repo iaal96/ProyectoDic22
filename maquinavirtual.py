@@ -1106,6 +1106,7 @@ def param(quad):
         lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
     else:
         lOp = getValueFromAddress(quad.left_operand)
+    #Asigna valor a parametro
     if address == 3:
         newMem.insertInt(lOp, quad.result)
     if address == 4:
@@ -1135,6 +1136,7 @@ def regresa(quad):
             newIndex += 1
         return newIndex
 
+#Verifica que el indice de arreglo este dentro del rango correcto
 def verifica(quad):
     arrType = quad.result // 1000
     if quad.left_operand >= 12000:
@@ -1152,10 +1154,13 @@ def verifica(quad):
     elif arrType == 5:
         localMem.adjustCharArrSize(quad.result)
 
+#Asignacion de arreglos
 def arrayAssign(quad):
     arrType = quad.result["address"] // 1000
+    #Calcular cuantas direcciones va a tener el arreglo multiplicando filas por columnas
     spacesToAssign = quad.left_operand["rows"] * quad.left_operand["cols"]
     leftOpAddress = quad.left_operand["address"]
+    #Asigna valores a las direcciones
     for i in range(spacesToAssign):
         leftOp = getValueFromAddress(leftOpAddress)
         if arrType == 0:
@@ -1170,11 +1175,14 @@ def arrayAssign(quad):
             localMem.insertFloat(leftOp, quad.result["address"] + i)
         elif arrType == 5:
             localMem.insertChar(leftOp, quad.result["address"] + i)
+        #Para asignar la siguiente "casilla"
         leftOpAddress += 1
 
 def arraySuma(quad):
     arrType = quad.result // 1000
+    #Calcular cuantas direcciones va a tener el arreglo multiplicando filas por columnas
     spacesToAdd = quad.left_operand["rows"] * quad.left_operand["cols"]
+    #Ajusta tamaño 
     if quad.left_operand["address"] // 1000 == 3:
         localMem.adjustIntArrSize(quad.left_operand["address"] + spacesToAdd)
     elif quad.left_operand["address"] // 1000 == 4:
@@ -1186,18 +1194,23 @@ def arraySuma(quad):
     leftOpAddress = quad.left_operand["address"]
     rightOpAddress = quad.right_operand["address"]
     for i in range(spacesToAdd):
+        #Saca valores de las direcciones
         leftOp = getValueFromAddress(leftOpAddress)
         rightOp = getValueFromAddress(rightOpAddress)
+        #Hace la suma e inserta en memoria temporal
         if arrType == 6:
             tempMem.insertInt(leftOp + rightOp, quad.result + i)
         elif arrType == 7:
             tempMem.insertFloat(leftOp + rightOp, quad.result + i)
+        #Direccion de siguientes indices
         leftOpAddress += 1
         rightOpAddress += 1
 
 def arrayResta(quad):
     arrType = quad.result // 1000
+     #Calcular cuantas direcciones va a tener el arreglo multiplicando filas por columnas
     spacesToSubtract = quad.left_operand["rows"] * quad.left_operand["cols"]
+    #Ajusta tamaño 
     if quad.left_operand["address"] // 1000 == 3:
         localMem.adjustIntArrSize(quad.left_operand["address"] + spacesToSubtract)
     elif quad.left_operand["address"] // 1000 == 4:
@@ -1209,18 +1222,23 @@ def arrayResta(quad):
     leftOpAddress = quad.left_operand["address"]
     rightOpAddress = quad.right_operand["address"]
     for i in range(spacesToSubtract):
+        #Saca valores de las direcciones
         leftOp = getValueFromAddress(leftOpAddress)
         rightOp = getValueFromAddress(rightOpAddress)
+         #Hace la resta e inserta en memoria temporal
         if arrType == 6:
             tempMem.insertInt(leftOp - rightOp, quad.result + i)
         elif arrType == 7:
             tempMem.insertFloat(leftOp - rightOp, quad.result + i)
+         #Direccion de siguientes indices
         leftOpAddress += 1
         rightOpAddress += 1
 
 def arrayMultiplica(quad):
     arrType = quad.result // 1000
+    #Calcular cuantas direcciones va a tener el arreglo sacando el cuadrado de filas del arreglo1
     spacesToMultiply = quad.left_operand["rows"] * quad.left_operand["rows"]
+    #Ajusta tamaño 
     if quad.left_operand["address"] // 1000 == 3:
         localMem.adjustIntArrSize(quad.left_operand["address"] + spacesToMultiply)
     elif quad.left_operand["address"] // 1000 == 4:
@@ -1231,21 +1249,27 @@ def arrayMultiplica(quad):
         localMem.adjustFloatArrSize(quad.right_operand["address"] + spacesToMultiply)
     leftOpAddress = quad.left_operand["address"]
     rightOpAddress = quad.right_operand["address"]
+    #Genera matriz de misma dimension a matriz1 pero con ceros
     leftOpArray = np.zeros((quad.left_operand["rows"], quad.left_operand["cols"]))
     memoryIterator = 0
+    #Meter los valores a la matriz nueva
     for i in range(quad.left_operand["cols"]):
         for j in range(quad.left_operand["rows"]):
             leftOpArray[j][i] = getValueFromAddress(leftOpAddress + memoryIterator)
             memoryIterator += 1
     memoryIterator = 0
+    #Genera matriz de misma dimension a matriz2 pero con ceros
     rightOpArray = np.zeros((quad.right_operand["rows"], quad.right_operand["cols"]))
+    #Meter los valores a la matriz nueva
     for i in range(quad.right_operand["cols"]):
         for j in range(quad.right_operand["rows"]):
             rightOpArray[j][i] = getValueFromAddress(rightOpAddress + memoryIterator)
             memoryIterator += 1
+        #Hace multiplicacion de matrices
     resultArray = np.dot(leftOpArray, rightOpArray)
     memoryIterator = 0
     arrayIterator = 0
+    #Mete la matriz resultante a memoria temporal
     for i in range(len(resultArray[0])):
         for j in range(len(resultArray)):
             if arrType == 6:
