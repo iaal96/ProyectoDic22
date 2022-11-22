@@ -186,7 +186,7 @@ def p_declaration(t):
 	'''declaration : VAR declarationPrim
 				   | '''
 	#Asignar cuadruplo start para funcion
-	#functionDir[currentScope]["start"] = Quadruples.next_id
+	functionDir[currentScope]["start"] = Quadruples.next_id
 
 #primitive=Primitive Data Types
 def p_declarationPrim(t):
@@ -1296,6 +1296,8 @@ def p_generateParam(t):
 	'generateParam : '
 	global funcName
 	global paramNum
+	if arrMatOperands.size() > 0:
+		Error.array_parameter_in_module_call(t.lexer.lineno)
 	#Pop a pila de operandos y se lo asigna a argumento
 	arg = operands.pop()
 	#Pop a la pila de tipos y se lo asigna a tipo de argumento

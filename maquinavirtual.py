@@ -1144,7 +1144,7 @@ def verifica(quad):
         verifica = getValueFromAddress(quad.left_operand)
     #Si operando izquierdo es mayor a resultado menos operando derecho dar error indice furea de rango
     if verifica > quad.result - quad.right_operand:
-        print("Error en Compilación: Indice", verifica, "en arreglo está fuera de rango.")
+        print("Error en Compilación: Indice", verifica, "en arreglo está fuera de rango. Debe estar entre", quad.right_operand, "y", quad.result, ".")
         exit(0)
     if arrType == 3:
         localMem.adjustIntArrSize(quad.result)

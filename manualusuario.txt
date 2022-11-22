@@ -1,0 +1,35 @@
+programa ejemplo;
+
+principal() {
+    //Incluye como parametro el numero al cual le quieres sacar la raiz cuadrada
+    raizcuadrada(24);
+    //Primer parametro es el numero a elevar, segundo parametro es la potencia a la que se va a elevar
+    pow(2,3);
+    //Incluye como parametro el numero al cual le quieres sacar el exponencial
+    exponencial(5);
+    //Incluye como parametro el numero al cual quieres redondear hacia arriba
+    redondear.arriba(5.5);
+    //Incluye como parametro el numero al cual quieres redondear hacia abajo 
+    redondear.abajo(4.6);
+    //Incluye como parametro el numero al cual le quieres sacar la funcion gamma
+    gamma(6);
+    //Incluye como parametro los 2 numeros a dividir para sacar el residuo
+    residuo(224,125);
+    //Incluye como parametro la cantidad de radianes que quieres convertir a grados
+    radianes(100.03);
+    //Incluye como parametro la cantidad de grados que quieres convertir a radianes
+    grados(8.90);
+    //Incluye como parametro el numero al cual quieres obtener el seno
+    seno(3.141528);
+    //Incluye como parametro el numero al cual quieres obtener el coseno
+    coseno(90);
+    //Incluye como parametro el numero al cual quieres obtener la tangente
+    tangente(90);
+    //Incluye como parametro el numero al cual quieresobtener el logaritmo
+    logaritmo(5);
+    //Incluye como parametro el numero al cual quieres obtener el logaritmo gamma
+    logaritmo.gamma(7);
+    //Incluye como parametro a , b, c y los 2 resultados de la formula general se imprimiran en terminal.
+    cuadratica(2,9,10);
+}
+

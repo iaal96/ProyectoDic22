@@ -7,7 +7,6 @@ principal() {
     i = 0;
     aux = 0;
 
-    //asignar arreglo
     arreglo[0] = 5;
     arreglo[1] = 9;
     arreglo[2] = 14;
