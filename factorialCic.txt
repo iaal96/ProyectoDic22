@@ -1,7 +1,7 @@
 programa factorialCic;
 
 principal() {
-    var int c, resultado, num;
+    var int c, resultado, num;  
     resultado = 1;
     imprime("Teclea un numero: ");
     lee(num);

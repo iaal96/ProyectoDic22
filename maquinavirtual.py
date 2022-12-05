@@ -89,6 +89,9 @@ def executeInstruction(quad):
     #Si el operador del cuadruplo es - , ejecuta la instruccion resta
     elif quad.operator == "-":
         return resta(quad)
+    #Si el operador del cuadruplo es - , ejecuta la instruccion resta
+    elif quad.operator == "%":
+        return porciento(quad)
     #Si el operador del cuadruplo es * , ejecuta la instruccion multiplica
     elif quad.operator == "*":
         return multiplica(quad)
@@ -401,6 +404,38 @@ def suma(quad):
         rOp = getValueFromAddress(quad.right_operand)
     #Suma operando izquierdo mas operando derecho y guarda en result
     result = lOp + rOp
+    #Si la direccion de res_address esta entre 6000-6999, es Int temporal, guardar int en memoria temporal
+    if res_address == 6:
+        tempMem.insertInt(result, quad.result)
+    #Si la direccion de res_address esta entre 7000-7999, es Float temporal, guardar float en memoria temporal
+    elif res_address == 7:
+        tempMem.insertFloat(result, quad.result)
+    # Para arreglos y matrices (direccion base + index de acceso)
+    elif res_address == 12:
+        while len(pointerMemStack) <= quad.result % 1000:
+            pointerMemStack.append(0)
+        pointerMemStack[quad.result % 1000] = lOp + rOp
+
+#Instruccion para sumar
+def porciento(quad):
+    #Se divide la direccion entre 1000
+    res_address = quad.result // 1000
+    # Si operando izquierdo es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.left_operand >= 12000:
+        lOp = getValueFromAddress(getValueFromAddress(quad.left_operand))
+    #Si operando izquierdo tiene otra direccion
+    else:
+        #Saca el valor del operando izquierdo
+        lOp = getValueFromAddress(quad.left_operand)
+    # Si operando derecho es apuntador a espacio de arreglo (direcciones 12000-12999)
+    if quad.right_operand >= 12000:
+        rOp = getValueFromAddress(getValueFromAddress(quad.right_operand))
+    #Si operando derecho tiene otra direccion
+    else:
+        #Saca el valor del operando derecho
+        rOp = getValueFromAddress(quad.right_operand)
+    #Suma operando izquierdo mas operando derecho y guarda en result
+    result = lOp % rOp
     #Si la direccion de res_address esta entre 6000-6999, es Int temporal, guardar int en memoria temporal
     if res_address == 6:
         tempMem.insertInt(result, quad.result)

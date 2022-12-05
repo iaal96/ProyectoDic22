@@ -1,0 +1,13 @@
+programa nuevo;
+
+funcion int pelos(int x){
+    regresa(x*2+2);
+}
+
+funcion int patito(int x){
+    regresa(pelos(x*2)+3);
+}
+
+principal(){
+    imprime(patito(4));
+}

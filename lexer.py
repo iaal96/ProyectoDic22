@@ -64,7 +64,8 @@ tokens = [
     'CST_FLOAT',
     'CST_STRING',
     'CST_CHAR',
-    'COMMENT_TEXT'
+    'COMMENT_TEXT',
+    'PORCIENTO',
 ] + list(reserved.values())
 
 # Tokens
@@ -81,6 +82,7 @@ t_MAS         = r'\+'
 t_MENOS         = r'-'
 t_DIVIDE        = r'/'
 t_MULTIPLICA      = r'\*'
+t_PORCIENTO = r'%'
 t_LEFTPAR       = r'\('
 t_RIGHTPAR      = r'\)'
 t_IGUAL         = r'='

@@ -14,5 +14,5 @@ principal() {
     var int x;
     imprime("Valor de x: ");
     lee(x);
-    imprime(fibonacci(fibonacci(x)));
+    imprime(fibonacci(x));
 }

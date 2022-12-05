@@ -934,7 +934,7 @@ def p_evaluateFactor(t):
 	#Si si hay operadores
 	if operators.size() != 0:
 		# Si el operador es * o /
-		if operators.peek() == "*" or operators.peek() == "/":
+		if operators.peek() == "*" or operators.peek() == "/" or operators.peek() == "%":
 			# Sacar operandos de la pila
 			rOp = operands.pop()
 			lOp = operands.pop()
@@ -1019,7 +1019,8 @@ def p_evaluateFactor(t):
 				
 def p_termFunction(t):
 	'''termFunction : MULTIPLICA addOperator term
-					| DIVIDE addOperator term '''
+					| DIVIDE addOperator term 
+					| PORCIENTO addOperator term'''
 
 #addOperator: Push a operador read al stack de operadores
 def p_addOperator(t):
